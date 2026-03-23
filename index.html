@@ -561,8 +561,10 @@
     #catalog-search:focus { outline: none; border-color: var(--g-light); box-shadow: 0 0 0 3px rgba(82,183,136,0.15); }
 
     .catalog-tabs {
-      display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px;
+      display: flex; gap: 5px; flex-wrap: nowrap; overflow-x: auto; margin-bottom: 12px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px;
     }
+    .catalog-tabs::-webkit-scrollbar { display: none; }
     .catalog-tab {
       padding: 5px 12px; border-radius: 99px; border: 1.5px solid var(--border);
       background: none; font-size: 12px; font-weight: 500; cursor: pointer;
@@ -769,6 +771,11 @@
 
       /* ── Plants tab ── */
       .plants-toolbar { gap: 7px; }
+      .plants-toolbar .filter-tabs { order: 1; width: 100%; }
+      .plants-toolbar .plants-search { order: 2; width: 100%; min-width: unset; }
+      .plants-toolbar select { order: 3; flex: 1; font-size: 13px; }
+      .plants-toolbar .btn-ghost[onclick*="openPlantNow"] { order: 4; flex: 1; font-size: 12px; }
+      .plants-toolbar .btn-primary { order: 5; }
       .filter-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
       .filter-tab { padding: 8px 12px; font-size: 12px; }
       .plants-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
@@ -831,7 +838,7 @@
       .note-card { padding: 12px; }
 
       /* ── Plant detail modal ── */
-      #plant-detail-modal .modal-box { max-width: 100%; }
+      #modal-plant-detail .modal-box { max-width: 100% !important; margin: 0; border-radius: var(--radius) var(--radius) 0 0; }
     }
 
     /* Very small phones (380px and below) */
@@ -1968,7 +1975,7 @@
 
     <!-- ── CATALOG VIEW ── -->
     <div id="plant-catalog-view">
-      <input type="text" id="catalog-search" placeholder="🔍  Search 75+ native plants, trees, shrubs, veggies…" oninput="filterCatalog()" />
+      <input type="text" id="catalog-search" placeholder="🔍  Search 430+ native plants, trees, shrubs, ferns, veggies…" oninput="filterCatalog()" />
       <div class="catalog-tabs">
         <button class="catalog-tab active" data-cat="all"       onclick="setCatalogTab(this)">All</button>
         <button class="catalog-tab"        data-cat="Tree"      onclick="setCatalogTab(this)">🌳 Trees</button>
@@ -1976,6 +1983,7 @@
         <button class="catalog-tab"        data-cat="Perennial" onclick="setCatalogTab(this)">🌸 Perennials</button>
         <button class="catalog-tab"        data-cat="Grass"     onclick="setCatalogTab(this)">🌾 Grasses</button>
         <button class="catalog-tab"        data-cat="Vine"      onclick="setCatalogTab(this)">🌺 Vines</button>
+        <button class="catalog-tab"        data-cat="Fern"      onclick="setCatalogTab(this)">🌿 Ferns</button>
         <button class="catalog-tab"        data-cat="Vegetable" onclick="setCatalogTab(this)">🥬 Veggies</button>
         <button class="catalog-tab"        data-cat="Herb"      onclick="setCatalogTab(this)">🌿 Herbs</button>
       </div>
@@ -2422,14 +2430,14 @@
 
 <!-- MODAL: PLANT DETAIL -->
 <div class="modal-overlay" id="modal-plant-detail">
-  <div class="modal-box" style="max-width:580px;padding:0;overflow:hidden">
-    <div id="plant-detail-hero" style="height:200px;background:var(--g-bg);position:relative;overflow:hidden">
+  <div class="modal-box" style="max-width:580px;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:90vh">
+    <div id="plant-detail-hero" style="height:200px;background:var(--g-bg);position:relative;overflow:hidden;flex-shrink:0">
       <img id="plant-detail-img" style="width:100%;height:100%;object-fit:cover;display:none" />
       <div id="plant-detail-hero-emoji" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px"></div>
       <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,0.5))"></div>
       <button onclick="closeModal('plant-detail')" style="position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.4);border:none;color:#fff;font-size:18px;cursor:pointer;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
     </div>
-    <div style="padding:22px 24px">
+    <div style="padding:22px 24px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px">
         <div>
           <h2 id="plant-detail-name" style="font-size:20px;font-weight:800;margin:0"></h2>
@@ -2438,7 +2446,7 @@
         <div id="plant-detail-status-badge"></div>
       </div>
       <div id="plant-detail-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px"></div>
-      <div id="plant-detail-wiki" style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:16px;padding:12px;background:var(--cream);border-radius:var(--radius-sm);min-height:60px"></div>
+      <div id="plant-detail-wiki" style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:16px;padding:12px;background:var(--cream);border-radius:var(--radius-sm)"></div>
       <div id="plant-detail-care" style="margin-bottom:16px"></div>
       <div id="plant-detail-companion" style="margin-bottom:16px"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -2772,6 +2780,724 @@ const PLANT_CATALOG = [
     sun:'Full Sun', water:'Low', season:'Ongoing', timing:'Spring',
     height:'2–4 ft', wildlife:null,
     notes:'Hardy in DC Zone 7a winters. Can grow into a large shrub. Beautiful blue flowers in spring.' },
+
+  // ── ALLIANCE FOR THE CHESAPEAKE BAY — Additional Native Plant Catalog ────
+  // Source: allianceforthebay.org/plants/ — 357 DC/Chesapeake region natives
+  { id:'at001', name:'box elder', sci:'Acer negundo', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'30 - 60ft', notes:'grows best in lowland sites along rivers, streams, ponds, and seasonally flooded areas; tolerates a variety of soil types. brittle wood; thicket-forming; Sometimes planted as a fast-growing, short lived shade tree; squirrels and songbirds eat the see' },
+  { id:'at002', name:'red maple', sci:'Acer rubrum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'March - April', timing:'Spring or Fall', height:'40 - 100ft', notes:'swamps, uplands; occasionally on dry rocky hillsides and sanddunes. earliest spring bloomer; adaptable; This species is responsible for much of the fall coloration, running from purple to bright reds or yellows; the dry fruits are eaten by many birds' },
+  { id:'at003', name:'silver maple', sci:'Acer saccharinum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'February - March', timing:'Spring or Fall', height:'50 - 100ft', notes:'wet, poorly drained, mucky or peaty soils of floodplains, streams, river bottoms, and along ponds and lakes. Wood used for furniture making and woodworking; used as a shade tree, but limbs break easily with snow or ice storms; the dry fruits are eate' },
+  { id:'at004', name:'sugar maple', sci:'Acer saccharum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'60 - 100ft', notes:'upland mesic forests, mountain coves and slopes. fall color; maple syrup; state tree of New York and West Virginia. Fall color: yellow, orange, red' },
+  { id:'at005', name:'mountain maple', sci:'Acer spicatum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'20 - 35ft', notes:'upland mesic, cool rich woods, moist rocky slopes and flats, along small streams. short-lived, strong acid preference; short-lived, strong acid preference. Fall color: orange to red' },
+  { id:'ap001', name:'doll\'s eyes', sci:'Actaea pachypoda', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 3ft', notes:'rich open woods, thickets. interesting berries; infrequent in Piedmont and mountain regions' },
+  { id:'ap002', name:'purple false foxglove', sci:'Agalinis purpurea', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'1 - 4ft', notes:'moist sandy fields, rocky shores, serpentine barrens' },
+  { id:'ap003', name:'white snakeroot', sci:'Ageratina altissima var. altissima', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'1 - 5ft', notes:'rich woods, thickets, clearings, meadows. tough plant; cultivars available; prefers basic soils; poisonous to livestock, causing trembling and loss of weight; very variable species' },
+  { id:'ag001', name:'nodding onion', sci:'Allium cernuum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium', season:'June - August', timing:'Spring or Fall', height:'0.5 - 2.5ft', notes:'ledges, gravels, rocky or wooded slopes' },
+  { id:'as001', name:'smooth alder', sci:'Alnus serrulata', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'High', season:'March - April', timing:'Spring or Fall', height:'12 - 20ft', notes:'fresh tidal and nontidal marshes, shrub swamps, forested wetlands. forms thickets along watercourses; nitrogen fixing; tolerates flooding to 3"; used by deer and beaver; the seeds are eaten by ruffed grouse, goldfinch, and a few other songbirds. Fall' },
+  { id:'at006', name:'downy serviceberry', sci:'Amelanchier arborea', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'March - May', timing:'Spring or Fall', height:'15 - 25ft', notes:'woods, along river banks, swamps, and rocky slopes; more common at lower elevations. used by 58 wildlife species; 35 bird species; important early summer food; berries edible to people; Has been cut for mine props, charcoal and sometimes used for han' },
+  { id:'ag002', name:'dunegrass', sci:'Ammophila breviligulata', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Low', season:'July - September', timing:'Spring or Fall', height:'1.5 - 3.5ft', notes:'maritime beach/dunes, maritime grassland, maritime shrubland. prefers well-drained, sandy sites; spreads rapidly by rhizomes' },
+  { id:'ag003', name:'bushy bluestem', sci:'Andropogon glomeratus', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'August - October', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'fresh marshes, wet soils, coastal areas. tolerates drought; grows in tufts; reddish fall color. Fall color: reddish' },
+  { id:'ap004', name:'round-leaved anemone', sci:'Anemone canadensis', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'damp thickets, meadows, gravelly shores. endangered/extirpated, MD' },
+  { id:'ap005', name:'thimbleweed', sci:'Anemone virginiana', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May - August', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'dry rocky open woods, slopes and thickets' },
+  { id:'ap006', name:'field pussytoes', sci:'Antennaria neglecta', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - July', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'upland meadow, other (pastures, plains, open woods)' },
+  { id:'ap007', name:'wild sarsaparilla', sci:'Aralia nudicaulis', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - July', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'dry to moist woods. aromatic; single-leaved; lacks an above-ground stem; not common in coastal plain' },
+  { id:'ap008', name:'spikenard', sci:'Aralia racemosa', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'June - August', timing:'Spring or Fall', height:'1.5 - 6.5ft', notes:'rich woods and thickets, wooded slopes and edges. not common in coastal plain' },
+  { id:'as002', name:'Devil\'s walking stick', sci:'Aralia spinosa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - August', timing:'Spring or Fall', height:'20 - 30ft', notes:'moist woods, stream banks, roadsides. seeds are poisonous if chewed; low maintenance; spreads from new shoots; thorny, clublike stem; Seeds are poisonous if chewed; sometimes cultivated; various songbirds use the berries; deer often browse the twigs ' },
+  { id:'ap009', name:'Jack-in-the-pulpit', sci:'Arisaema triphyllum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'March - June', timing:'Spring or Fall', height:'1 - 3ft', notes:'wet woods, bogs and swamps. red berry clusters appear late summer to fall; unusual flower; spreads rapidly from seed' },
+  { id:'av001', name:'pipevine', sci:'Aristolochia macrophylla', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'20 - 36ft', notes:'rich woods, and banks of streams. occasionally escapes from cultivation; host for pipevine swallowtail butterfly; endangered in MD, grows best in deep loams. Fall color: yellow green' },
+  { id:'ap010', name:'goat\'s-beard', sci:'Aruncus dioicus', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'3.5 - 6.5ft', notes:'rich woods and ravines, wooded roadsides' },
+  { id:'ap011', name:'wild ginger', sci:'Asarum canadense', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'rich woodlands, less so on acid soils. flower inconspicuous; attractive leaves; will spread; semi-evergreen. Fall color: semi-evergreen' },
+  { id:'ap012', name:'swamp milkweed', sci:'Asclepias incarnata', emoji:'🌺', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'4 - 6ft', notes:'fresh tidal and nontidal marshes, wet meadows, shrub swamps, clearings of wet woods, shores and ditches. can tolerate drought; interesting seed pod' },
+  { id:'at007', name:'paw-paw', sci:'Asimina triloba', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'20 - 35ft', notes:'deep, rich, moist soils of river valleys and bottomlands. Also in the understory of hardwood forests. Fruits can be eaten raw or made into desserts; fruits eaten by foxes, raccoons, opossums. Fall color: yellow/copper-red' },
+  { id:'af001', name:'ebony spleenwort', sci:'Asplenium platyneuron', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part/Shade', water:'Medium', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'sandy or clayey banks, open woods and thickets, slopes, rocky ledges, swamps. easily transplanted; only moderate care needed; evergreen. Fall color: evergreen' },
+  { id:'af002', name:'northern lady fern', sci:'Athyrium filix-femina', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'1 - 3ft', notes:'wet woods, moist banks, wooded hillsides, sandy bogs. varieties occur throughout region; in MD, VA can also use subspecies asplenioides (southern lady fern)' },
+  { id:'as003', name:'high-tide bush', sci:'Baccharis halimifolia', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'High', season:'August - September', timing:'Spring or Fall', height:'6 - 12ft', notes:'salt or brackish marshes, fresh tidal marshes and ditches, shores, dunes. volunteers in disturbed places; shallow, lateral roots; tolerates flooding to 6"; tolerates salinity to 15 ppt. Fall color: purple' },
+  { id:'ap013', name:'wild blue indigo', sci:'Baptisia australis', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'3 - 5ft', notes:'rich open woods, alluvial thickets, stream banks, sandy floodplains. tolerates poor soils; flowers very showy; shrublike form; threatened in MD, rare to uncommon in VA (S3)--but both reviewers o.k.ed' },
+  { id:'ap014', name:'yellow wild indigo', sci:'Baptisia tinctoria', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'May - September', timing:'Spring or Fall', height:'1 - 3ft', notes:'dry open woods and clearings, sandy acidic soil. tolerates poor soils; showy, bright yellow flowers' },
+  { id:'at008', name:'yellow birch', sci:'Betula alleghaniensis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Part Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'60 - 80ft', notes:'moist, rich uplands to low-lying swamps and borders of streams, elevated floodplain terrace and knobs. fall color; attractive winter texture and color; prefers cool, moist conditions, common on calcareous soils; B. lutea syn for B. all. var. all. Woo' },
+  { id:'at009', name:'sweet birch', sci:'Betula lenta', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'50 - 75ft', notes:'cool north and east slope, steep rocky land and lower slopes. excellent fall color; prefers moist sites, tolerates dry; colonizes open or disturbed areas; Seedlings invade open fields and road banks, often forming nearly pure stands; wood used for ca' },
+  { id:'at010', name:'river birch', sci:'Betula nigra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'50 - 75ft', notes:'lowland species mainly along streams, rivers, ponds, and swamps. attractive peeling bark;; Used for furniture, fuel, and pulpwood; ruffed grouse and wild turkey sometimes eat the seeds. Fall color: yellow' },
+  { id:'ap015', name:'nodding beggar-ticks', sci:'Bidens cernua', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'tidal marsh, sloughs, springs, pools, shore' },
+  { id:'av002', name:'crossvine', sci:'Bignonia capreolata', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'30 - 45ft', notes:'alluvial woods, swampy forests, calcareous soils on river banks, cliffs in ravines, dry open woods, bogs, fence rows, rock outcrops. spreads across ground and climbs any structure it meets (control by cutting); semi-evergreen. Fall color: semi-evergr' },
+  { id:'ap016', name:'star boltonia', sci:'Boltonia asteroides', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'0.5 - 2.5ft', notes:'gravelly shores, sandy thickets. endangered in MD, S3 rare to uncommon in VA' },
+  { id:'af003', name:'rattlesnake fern', sci:'Botrychium virginianum', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Low–Medium', timing:'Spring or Fall', height:'1 - 2ft', notes:'rich, well-drained, wooded areas' },
+  { id:'ag004', name:'bluejoint reedgrass', sci:'Calamagrostis canadensis', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'June - August', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'meadows, bogs, wet thickets, etc' },
+  { id:'as004', name:'American beautyberry', sci:'Callicarpa americana', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - August', timing:'Spring or Fall', height:'6 - 6ft', notes:'in most soils. flowers from new growth; if overgrown prune to 6-18" tall; will regain height in one season; Now cultivated as an ornamental; fruits are eaten by quail and several species of songbirds; some question its native range, not common' },
+  { id:'ap017', name:'marsh marigold', sci:'Caltha palustris', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'April - June', timing:'Spring or Fall', height:'1 - 2ft', notes:'forested wetlands, shrub swamps, streambanks, seeps, wet meadows. clump-forming; needs some periods of drier soil; tolerates flooding to 6"' },
+  { id:'ap018', name:'American bellflower', sci:'Campanulastrum americanum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'June - August', timing:'Spring or Fall', height:'1.5 - 6.5ft', notes:'rich moist woods, rocky wooded slopes, stream banks. FACU' },
+  { id:'av003', name:'trumpet vine', sci:'Campsis radicans', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - September', timing:'Spring or Fall', height:'30 - 30ft', notes:'moist woodlands, fence rows, roadside thickets, floodplain forests, rock hillsides, open woods, stream banks, old fields. thick, twisted, aged woody vines; leaves/flowers may cause dermatitis (skin irritation); Attractive but becoming a nuisance in m' },
+  { id:'ap019', name:'toothwort', sci:'Cardamine concatenata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 1.5ft', notes:'rich woods, wooded bottoms, calcareous rocky banks' },
+  { id:'ag005', name:'long hair sedge', sci:'Carex crinita var. crinita', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'June - August', timing:'Spring or Fall', height:'1 - 5ft', notes:'swales, damp thickets, and low woods' },
+  { id:'ag006', name:'blue wood sedge', sci:'Carex glaucodea', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - July', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'moist to dry woods and fields. clump-forming; alternative to Liriope' },
+  { id:'ag007', name:'sallow sedge', sci:'Carex lurida', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'June - October', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'swales, swamps, and wet woods. wetland plant; interesting seeds' },
+  { id:'ag008', name:'Pennsylvania sedge', sci:'Carex pensylvanica', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - July', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'open dry soil or open woods; dry or sandy, open or rocky oak woods, wooded slopes; clump-forming. alternative to lawn; plant densely; fine textured leaves <6"' },
+  { id:'ag009', name:'tussock sedge', sci:'Carex stricta', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'May - August', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'fresh tidal and nontidal marshes, shrub swamps, forested wetlands, wet swales, moist fields. grows in clumps; partly persists in winter; tolerates flooding to 6"' },
+  { id:'ag010', name:'fox sedge', sci:'Carex vulpinoidea', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'June - August', timing:'Spring or Fall', height:'0.5 - 3.5ft', notes:'shallow emergent marsh, shrub swamp, floodplain forest, hardwood swamp. grows in clumps; tolerates saturation and flooding to 6"' },
+  { id:'at011', name:'American hornbeam', sci:'Carpinus caroliniana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'13 - 40ft', notes:'deep, rich, moist soils of river margins, bottomlands, and swamps. slow growing and short lived; Deer browse the twigs and leaves; beaver, gray squirrel, and rabbit use the bark, buds and seeds; the seeds, catkins, and buds are used by ruffed grouse,' },
+  { id:'at012', name:'mockernut hickory', sci:'Carya alba', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'60 - 100ft', notes:'ridges, dry hills, and hillsides; rich well drained soils. good fall color; Sapwood thick, white, strong and flexible, excellent for tool handles; hickory nuts are much used by squirrels and other forest rodents. Fall color: yellow' },
+  { id:'at013', name:'bitternut hickory', sci:'Carya cordiformis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'60 - 100ft', notes:'can grow in swamps and frequently flooded areas and dry hillsides; does best in rich bottomlands. Wood used for charcoal, mine props, pulpwood, handles and fuel; hickory nuts are much used by squirrels and other forest rodents. Fall color: yellow' },
+  { id:'at014', name:'pignut hickory', sci:'Carya glabra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'60 - 100ft', notes:'dry woods, primarily on hillsides and along dry ridges; does best in deep, moist, well drained soils. Wood used for mine props, charcoal, handles and fuel; hickory nuts are much used by squirrels and other forest rodents. Fall color: yellow' },
+  { id:'at015', name:'shagbark hickory', sci:'Carya ovata', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'70 - 100ft', notes:'both dry upland slopes to 2,000 feet, and deep well-drained soils in lowlands and valleys. attractive peeling bark; Wood used for mine props, lumber, tool handles, fuel, athletic equipment (especially skis and bows), charcoal, smoking meat; hickory n' },
+  { id:'at016', name:'chinquapin', sci:'Castanea pumila', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low', season:'June - June', timing:'Spring or Fall', height:'12 - 20ft', notes:'dry rocky slopes, dry woods, steep rocky land, rocky stream banks, sandy ridges, borders of swamps, open woods. sweet, edible fruit. Fall color: yellow or purple' },
+  { id:'ap020', name:'blue cohosh', sci:'Caulophyllum thalictroides', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'moist rich woods. Caulophyllum fruit is either a berry or capsule: C. tahkuctriudes fruit is "drupe-like" in appearance' },
+  { id:'av004', name:'American bittersweet', sci:'Celastrus scandens', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'3 - 35ft', notes:'roadsides, woods edge, fence rows, old pastures, hedges, rocky streams, bluffs, rocky slopes, dunes, sandy oak woods. distinguished from nonnative invasive Oriental bittersweet by flowers/fruits in clusters at ends of twigs; Fruits much used for flor' },
+  { id:'at017', name:'common hackberry', sci:'Celtis occidentalis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'High', season:'April - May', timing:'Spring or Fall', height:'40 - 100ft', notes:'drainage basins, mature floodplains, wooded slopes or high rocky limestone bluffs bordering streams, windbreaks. butterfly larval host; drought tolerant; tolerates occasional flooding; saplings can sprout in deep shade, common on limestone soils; Fru' },
+  { id:'as005', name:'buttonbush', sci:'Cephalanthus occidentalis', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'High', season:'July - August', timing:'Spring or Fall', height:'6 - 12ft', notes:'fresh tidal and nontidal marshes, shrub swamps, forested wetlands, borders of streams, lakes, and ponds. needs sun to flower; flowers fragrant; interesting fruit; tolerates drought; leaves may persist into winter; tolerates flooding to 36"; Excellent' },
+  { id:'ap021', name:'partridge pea', sci:'Chamaecrista fasciculata', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'July - September', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'upland meadows, sandy fields, stream banks. pods coil after split open; spreads' },
+  { id:'at018', name:'Atlantic white cedar', sci:'Chamaecyparis thyoides', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'March - April', timing:'Spring or Fall', height:'75 - 75ft', notes:'freshwater swamps or wet woods; best in acid-peat beds. S3 rare to uncommon in VA; Wood aromatic, lightweight, soft and weak but durable in soil; used for shingles, lawn furniture, ornamental fences, poles, stakes; somewhat planted as an ornamental, ' },
+  { id:'ap022', name:'fireweed', sci:'Chamerion angustifolium spp angustifolium', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low–Medium', season:'June - September', timing:'Spring or Fall', height:'3 - 10ft', notes:'recent clearings, burned woodlands, damp ravines, open sandy ground. **[need to x-ref minimum height]**' },
+  { id:'ap023', name:'striped wintergreen', sci:'Chimaphila maculata', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low', season:'June - August', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'acid, dry woods, frequently under pines. flowers fragrant' },
+  { id:'at019', name:'white fringetree', sci:'Chionanthus virginicus', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'20 - 35ft', notes:'moist streambanks, ridges, and hillsides in sandy to deep-rich soils. Flowers have odor of cloves; much planted. Fall color: yellow' },
+  { id:'ap024', name:'green-and-gold', sci:'Chrysogonum virginianum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'March - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'open woods on limestone, rocky open woodland. will bloom longer if kept moist' },
+  { id:'ap025', name:'golden aster', sci:'Chrysopsis mariana', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'July - October', timing:'Spring or Fall', height:'0.5 - 2.5ft', notes:'dry sandy or argillaceous or rocky woods and openings, roadsides, serpentine barrens. UPL' },
+  { id:'ap026', name:'black snakeroot', sci:'Cimicifuga racemosa', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'June - September', timing:'Spring or Fall', height:'2.5 - 8.5ft', notes:'rich woods, wooded slopes, ravines, thickets' },
+  { id:'ap027', name:'narrowleaf spring beauty', sci:'Claytonia virginica', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'March - May', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rich woods, thickets and clearings, alluvial soils. FAC' },
+  { id:'av005', name:'leather flower', sci:'Clematis viorna', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - August', timing:'Spring or Fall', height:'6 - 6ft', notes:'rich wooded banks and thickets. feathery seeds' },
+  { id:'av006', name:'virgin\'s bower', sci:'Clematis virginiana', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'July - September', timing:'Spring or Fall', height:'6 - 20ft', notes:'fencerows and thickets, riverbanks, low calcareous thickets, woods edge, roadside swales, swamps, overhanging cliffs. fragrant flowers; feathery seeds; young plants can be transplanted;yellow, green or purplish fall color; dioecious. Fall color: yell' },
+  { id:'ap028', name:'Maryland butterfly pea', sci:'Clitoria mariana', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'June - September', timing:'Spring or Fall', height:'6 - 6ft', notes:'dry, open areas on sandy soils. vine-like; seeds eaten by quail, but not an important food source' },
+  { id:'at020', name:'alternate-leaf dogwood', sci:'Cornus alternifolia', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'15 - 25ft', notes:'dry woods and rocky slopes; rich woodlands and forest margins. used by 64 wildlife species; 43 bird species; keep root zone moist and acidic; tolerates full sun; young stems often purple; Seems to become diseased and dies before attaining a large siz' },
+  { id:'as006', name:'silky dogwood', sci:'Cornus amomum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'6 - 12ft', notes:'forested seasonal wetlands and floodplains, shrub wetlands, stream and pond banks, clearings. Fall color: orange, red or purple' },
+  { id:'as007', name:'red-panicled dogwood', sci:'Cornus racemosa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'6 - 12ft', notes:'open wooded floodplains, forested wetlands, shrub swamps, stream borders, rocky woods or ledges, fencerows. tolerates a variety of conditions; berries are food for many songbirds and small mammals. Fall color: purple' },
+  { id:'as008', name:'American hazelnut or filbert', sci:'Corylus americana', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Part Sun', water:'Low–Medium', season:'March - April', timing:'Spring or Fall', height:'10 - 15ft', notes:'dry woodlands, woods edge, rocky wooded or open hillsides, fence rows, ravine banks, floodplain woods, brushy pastures. forms large thickets; edible nut; male catkins brown, female red; Grows in clumps or extensive patches; nuts good flavored, freque' },
+  { id:'at021', name:'cockspur hawthorn', sci:'Crataegus crus-galli', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'20 - 35ft', notes:'thickets and open ground, especially in dry or rocky places; slopes of low hills in rich soils. Pests in pastures; many varieties are used in landscaping; fruits remain on the tree all winter, providing food for numerous birds and mammals, including ' },
+  { id:'at022', name:'southern thorn', sci:'Crataegus viridis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'April - April', timing:'Spring or Fall', height:'20 - 35ft', notes:'moist soils in lowlands and valleys. Pests in pastures; many varieties are used in landscaping; fruits remain on the tree all winter, providing food for numerous birds and mammals, including bobwhite, partridge, pheasant, ruffed and sharptail grouse,' },
+  { id:'ag011', name:'poverty oatgrass', sci:'Danthonia spicata', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'May - July', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'open woods, old pastures, and meadows' },
+  { id:'ap029', name:'dwarf larkspur', sci:'Delphinium tricorne', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'rich woods and calcareous slopes, thickets, and river bluffs' },
+  { id:'af004', name:'hay-scented fern', sci:'Dennstaedtia punctilobula', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part Sun', water:'Low–Medium', timing:'Spring or Fall', height:'1 - 3ft', notes:'open woods and fields. can spread over large areas of open understory or pasture' },
+  { id:'ap030', name:'panicled or narrow-leaf tick-trefoil', sci:'Desmodium paniculatum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'July - September', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'clearings and borders of moist or dry woods. not found near coast; plants eaten by deer; seeds food for upland game birds' },
+  { id:'ap031', name:'squirrel corn', sci:'Dicentra canadensis', emoji:'🌺', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rich woods. flowers hyacinth scented' },
+  { id:'ap032', name:'wild bleeding heart', sci:'Dicentra eximia', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - September', timing:'Spring or Fall', height:'1.5 - 2ft', notes:'rocky woods and cliffs, rich woods. sometimes cultivated; threatened in MD' },
+  { id:'ap033', name:'Dutchman\'s breeches', sci:'Dicentra cucullaria', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rich woods. leaves basal; dormant in summer' },
+  { id:'ag012', name:'deer-tongue', sci:'Dichanthelium clandestinum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - October', timing:'Spring or Fall', height:'2 - 5ft', notes:'moist woods, along roadsides' },
+  { id:'ag013', name:'variable panicgrass', sci:'Dichanthelium commutatum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - October', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'rocky or sandy woods' },
+  { id:'at023', name:'common persimmon', sci:'Diospyros virginiana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - June', timing:'Spring or Fall', height:'50 - 75ft', notes:'open, disturbed areas and deciduous woodlands. edible fruits; Wood used for shuttles, golf clubs, billiard cues, brushes; ripe, soft, and full colored persimmons are delicious; deer eat twigs, leaves and fruit of the persimmon; fruits important in th' },
+  { id:'ag014', name:'saltgrass', sci:'Distichlis spicata', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'August - October', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'tidal salt marshes, from Mean High tide above to spring tide level; high salinity; wet depressions. often intermixed with Spartina patens; forms dense mats; tolerates salinity to 50 ppt' },
+  { id:'ap034', name:'shooting star', sci:'Dodecatheon meadia', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'open woods, meadows, moist slopes and prairies. FACU' },
+  { id:'ap035', name:'flat-top white aster', sci:'Doellingeria umbellata var. umbellata', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'August - October', timing:'Spring or Fall', height:'1 - 7.5ft', notes:'open areas and woods' },
+  { id:'af005', name:'toothed or spinulose woodfern', sci:'Dryopteris carthusiana', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'low woods, thickets and swamps, less often in dry woods; rich mesophytic forest; moist, rich woods and rocky slopes. forms colonies; semi-evergreen. Fall color: semi-evergreen' },
+  { id:'af006', name:'crested woodfern', sci:'Dryopteris cristata', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part/Shade', water:'Medium–High', timing:'Spring or Fall', height:'1.5 - 2.5ft', notes:'shallow emergent marsh, shrub swamp, hardwood swamp; wooded swamps or open shrubby wetlands. small rosette fronds. Fall color: evergreen' },
+  { id:'af007', name:'evergreen wood-fern', sci:'Dryopteris intermedia', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'2.5 - 2.5ft', notes:'rich, moist to dry woods. clump-former; not common on coastal plain; hybridizes with eight species. Fall color: evergreen' },
+  { id:'af008', name:'marginal shield fern', sci:'Dryopteris marginalis', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Low–Medium', timing:'Spring or Fall', height:'1 - 3ft', notes:'moist woods and clearings. clump-former; attractive; easily transplanted. Fall color: evergreen' },
+  { id:'ag015', name:'three-sided sedge', sci:'Dulichium arundinaceum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'July - October', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'fresh tidal and nontidal marshes, bogs, swamps, pond edges. grows best where water rarely draws down' },
+  { id:'ag016', name:'Canada wild rye', sci:'Elymus canadensis', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Low–Medium', season:'June - October', timing:'Spring or Fall', height:'2 - 6.5ft', notes:'dry, sandy, gravely, or rocky soil. rare in VA' },
+  { id:'ag017', name:'bottlebrush grass', sci:'Elymus hystrix', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part/Shade', water:'Medium', season:'June - August', timing:'Spring or Fall', height:'2 - 4ft', notes:'moist, alluvial woods. usually in patches of considerable size' },
+  { id:'ag018', name:'riverbank wild-rye', sci:'Elymus riparius', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'0.5 - 5ft', notes:'rich thickets and stream borders, alluvial flats, meadows. good for streambank conditions; FAC wetland' },
+  { id:'ag019', name:'Virginia wild rye', sci:'Elymus virginicus', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'June - October', timing:'Spring or Fall', height:'1 - 5.5ft', notes:'rich thickets and shores, meadows. tolerates a wide range of conditions; forms clumps; grows in tufts; FACW' },
+  { id:'ap036', name:'robin\'s plantain', sci:'Erigeron pulchellus', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Part Sun', water:'Low–Medium', season:'April - September', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'copses, open woods and meadows, wooded slopes, roadsides. FACU' },
+  { id:'ap037', name:'trout lily', sci:'Erythronium americanum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'March - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'moist woods, rich slopes, bottomlands, meadows' },
+  { id:'ap038', name:'Joe-Pye weed', sci:'Eupatorium dubium', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - October', timing:'Spring or Fall', height:'2 - 5ft', notes:'moist, usually sandy acidic soil of swamps, bogs, marshes, swales. **[where did 7\' max come from? most refs say to 5\'+]**' },
+  { id:'ap039', name:'hyssop-leaved thoroughwort', sci:'Eupatorium hyssopifolium', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'1 - 4.5ft', notes:'dry, sandy or gravelly fields roadsides, and railroad right of ways; woods, fields, salt meadows' },
+  { id:'ap040', name:'spotted Joe-Pye weed', sci:'Eupatorium maculatum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'July - September', timing:'Spring or Fall', height:'2 - 6.5ft', notes:'floodplains, swamps, and alluvial thickets; grasslands. FACW; RT&E in MD, S2 very rare in VA (all VA plants are E. maculatum var. maculatum)' },
+  { id:'ap041', name:'common boneset', sci:'Eupatorium perfoliatum', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'July - October', timing:'Spring or Fall', height:'1 - 5ft', notes:'floodplains, swamps, bogs, streambanks, and wet meadows. FACW+' },
+  { id:'ap042', name:'green-stemmed Joe-Pye weed', sci:'Eupatorium purpureum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'2 - 6.5ft', notes:'open woods fields and floodplains. occurs in drier, shadier habitats than other joe-pye-weeds; injured or dried plant has vanilla scent; FAC' },
+  { id:'ap043', name:'white wood aster', sci:'Eurybia divaricata', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'dry woods and clearings' },
+  { id:'at024', name:'American beech', sci:'Fagus grandifolia', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'50 - 100ft', notes:'variety of soils, moist rich uplands and lowlands. edible nuts; attractive bark; leaves may persist into winter; max ht 70? Used for furniture, pulpwood, charcoal and low grade lumber; excellent for fuel; deer browse the twigs and foliage to some ext' },
+  { id:'ag020', name:'red fescue', sci:'Festuca rubra', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'dry woods, roadsides, and waste ground. can be used as turf grass; grows best in part shade; valued as lawn grass for shady spots; many cultivated varieties have been developed' },
+  { id:'at025', name:'white ash', sci:'Fraxinus americana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'50 - 100ft', notes:'moist upland slopes, valleys, coves, and bottomlands. fast growth; fall color; Wood used for long tool handles and baseball hats; twigs serve as deer food; flowers provide pollen for bees. Fall color: yellow, maroon' },
+  { id:'at026', name:'green ash', sci:'Fraxinus pennsylvanica', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'High', season:'April - May', timing:'Spring or Fall', height:'50 - 75ft', notes:'tidal freshwater forested wetlands; nontidal forested wetlands; regularly flooded. tolerates drought; tolerates infrequent flooding and some salt; male and female flowers on separate plants; Twigs serve as deer food; flowers provide pollen for bees; ' },
+  { id:'as009', name:'dangleberry', sci:'Gaylussacia frondosa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'April - June', timing:'Spring or Fall', height:'2 - 4ft', notes:'dry to wet woods and thickets. berries borne on long, drooping stems; Furnish browse for deer; fruits are eaten by ruffed grouse, quail, wild turkey, squirrels, and numerous songbirds. Fall color: reddish-purple' },
+  { id:'ap044', name:'closed gentian', sci:'Gentiana clausa', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Part Sun', water:'Medium–High', season:'August - October', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'moist open woods, stream banks, meadows, in noncalcareous soils. FACW' },
+  { id:'ap045', name:'wild geranium', sci:'Geranium maculatum', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - July', timing:'Spring or Fall', height:'1 - 2ft', notes:'woods, roadsides, & fields. adaptable plant; long bloom time; spreader; herbal uses; explosive seed capsule; FACU; MD rare in coastal' },
+  { id:'ap046', name:'downy rattlesnake plantain', sci:'Goodyera pubescens', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Part Sun', water:'Low–Medium', season:'June - August', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'dry to moist deciduous or coniferous forests. very handsome throughout winter' },
+  { id:'ap047', name:'yellow sneezeweed', sci:'Helenium autumnale', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium', season:'July - November', timing:'Spring or Fall', height:'1.5 - 6ft', notes:'low woods, swamps, moist riverbanks, alluvial thickets, wet meadows, marshes, ditches. tolerates wet areas; showy flowers; herbal uses; FACW' },
+  { id:'ap048', name:'swamp sunflower', sci:'Helianthus angustifolius', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Medium–High', season:'August - October', timing:'Spring or Fall', height:'1.5 - 5.5ft', notes:'swamps and moist, sandy ground. r&b: believed extirpated' },
+  { id:'ap049', name:'ten-petaled sunflower', sci:'Helianthus decapetalus', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'July - October', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'fields, moist bottomlands, stream banks, roadsides. FACU' },
+  { id:'ap050', name:'woodland sunflower', sci:'Helianthus divaricatus', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Part Sun', water:'Low–Medium', season:'July - September', timing:'Spring or Fall', height:'1.5 - 6.5ft', notes:'dry open woods, wooded slopes, shale barrens, roadsides. infrequent on coastal plain' },
+  { id:'ap051', name:'oxeye sunflower', sci:'Heliopsis helianthoides', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - September', timing:'Spring or Fall', height:'1 - 5ft', notes:'fields, open woods, floodplains, thickets, stream banks. long bloom time' },
+  { id:'ap052', name:'sharp-lobed hepatica', sci:'Hepatica nobilis var. acuta', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'March - June', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'rich upland woods and rocky slopes; often in calcareous soil. may bloom throughout year (rarely)' },
+  { id:'ap053', name:'round-lobed hepatica', sci:'Hepatica nobilis var. obtusa', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'March - June', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'dry or rocky woods, dry upland slopes' },
+  { id:'ap054', name:'cow parsnip', sci:'Heracleum maximum', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Medium–High', season:'May - August', timing:'Spring or Fall', height:'3.5 - 10ft', notes:'rich woods, wooded roadside banks, marshy flats, streambanks, ditches. can cause a dermatitis (skin) reaction' },
+  { id:'ap055', name:'alumroot', sci:'Heuchera americana', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'rich woods, rocky slopes and shaly cliffs. long bloom time; many cultivars and hybrids; semi-evergreen; prefers basic soils. Fall color: semi-evergreen' },
+  { id:'ap056', name:'hairy heuchera', sci:'Heuchera villosa', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'June - October', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'damp rocks, rich wooded slopes' },
+  { id:'ap057', name:'rose mallow', sci:'Hibiscus moscheutos', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'July - September', timing:'Spring or Fall', height:'3 - 6ft', notes:'fresh to brackish tidal marshes, occasionally nontidal marshes. common along coast; persists in winter; split seed capsules; use H. laevis in Piedmont; tolerates salinity to 15 ppt' },
+  { id:'ap058', name:'bluet', sci:'Houstonia caerulea', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'meadows, fields, and thickets, open woods & edges. FACU' },
+  { id:'as010', name:'wild or smooth hydrangea', sci:'Hydrangea arborescens', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Medium', season:'June - August', timing:'Spring or Fall', height:'3 - 6ft', notes:'moist, rich woods in floodplains or upland, streambanks. eaves poisonous to humans; does best on loamy soils. Fall color: yellow' },
+  { id:'ap059', name:'Virginia waterleaf', sci:'Hydrophyllum virginianum', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - August', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'moist woods, thickets, and stream banks. FAC' },
+  { id:'ap060', name:'Allegheny stonecrop', sci:'Hylotelephium telephioides', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium', season:'August - September', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'dry rocky places. naturally occurs in bare rock outcrops, but does well in garden; rare in PA, threatened in NY' },
+  { id:'as011', name:'dense St. John\'s wort', sci:'Hypericum densiflorum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'1.5 - 6ft', notes:'low boggy places, seepage slopes, pond and lake borders, wet meadows, stream banks, roadside ditches, moist pinelands. blooms small but form dense flat-topped clusters; can spread aggressively; range is scattered parts WV, PA, MD -- H. prolificum (sh' },
+  { id:'as012', name:'smooth winterberry', sci:'Ilex laevigata', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'10 - 12ft', notes:'wooded swamps, mostly at low altitude. berries provide winter bird food; prefers soil with a calcareous layer; Upland gamebirds, many songbirds, squirrels and raccoons eat the fruits; deer browse the twigs and leaves. Fall color: yellow' },
+  { id:'ap061', name:'jewelweed', sci:'Impatiens capensis', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'May - October', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'moist ground of meadows, swamps, stream banks and open woods. ripe seed pod explodes with contact; remedy for poison ivy itching' },
+  { id:'ap062', name:'stiff-leaf aster', sci:'Ionactis linariifolius', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'grassland, successional shrubland, oak-hickory forest; well-drained, sandy, average to poor fertility soils; dry rocky woods and edges' },
+  { id:'ag021', name:'slender blueflag', sci:'Iris prismatica', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'May - June', timing:'Spring or Fall', height:'1 - 3ft', notes:'fresh to moderately brackish tidal marshes, wet meadows and shores, swamps, forested wetlands. leaves 1/4-inch wide, narrower than Iris versicolor; tolerates salinity to 0.5 ppt; S3 rare to uncommon in VA' },
+  { id:'ag022', name:'blue flag', sci:'Iris versicolor', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'May - June', timing:'Spring or Fall', height:'3 - 3ft', notes:'fresh to moderately brackish tidal marshes, wet meadows and shores, swamps, forested wetlands. tolerates salinity to 0.5 ppt; S3 rare to uncommon in VA' },
+  { id:'ag023', name:'Virginia blue flag', sci:'Iris virginica', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'May - July', timing:'Spring or Fall', height:'1 - 2ft', notes:'fresh to moderately brackish tidal marshes, wet meadows and shores, swamps, forested wetlands. tolerates salinity to 0.5 ppt' },
+  { id:'as013', name:'tassel-white', sci:'Itea virginica', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'High', season:'June - July', timing:'Spring or Fall', height:'6 - 10ft', notes:'forested wetlands, shrub swamps, streambanks, shallow water. fruit capsules on stalk; plant will sucker, form thickets; tolerates flooding to 6"; low wildlife use (insects use it). Fall color: red to purple' },
+  { id:'as014', name:'marsh elder', sci:'Iva frutescens', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'2 - 10ft', notes:'tidal brackish and salt marshes, above mean high tide to upland. similar to Baccharis halimifolia but with opposite leaves; tolerates salinity to 15 ppt' },
+  { id:'ap063', name:'twinleaf', sci:'Jeffersonia diphylla', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rich woods, calcareous soils. listed as Ranunculaceae in Brown and Brown' },
+  { id:'at027', name:'black walnut', sci:'Juglans nigra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'70 - 90ft', notes:'mesic woods, slopes, and along streams. may stunt growth of nearby plants; Seeds used to flavor ice-cream and candy; wood excellent for furniture and gunstocks; certain plants such as apples, heaths, and tomatoes, grow poorly when near the roots of b' },
+  { id:'ag024', name:'Canada rush', sci:'Juncus canadensis', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'July - October', timing:'Spring or Fall', height:'1 - 4ft', notes:'fresh to slightly brackish tidal and nontidal marshes, swamps, wet shores. tolerates salinity to 0.5 ppt' },
+  { id:'ag025', name:'soft rush', sci:'Juncus effusus', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'1 - 4ft', notes:'fresh tidal and nontidal marshes, shrub swamps, wet meadows, ditches. often grows in clumps' },
+  { id:'ag026', name:'black needlerush', sci:'Juncus roemerianus', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Medium–High', season:'May - October', timing:'Spring or Fall', height:'1 - 4ft', notes:'brackish and salt marshes, above Mean High tide to spring tide level. some nitrogen fixing value; tolerates salinity to 25 ppt' },
+  { id:'at028', name:'eastern red cedar', sci:'Juniperus virginiana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'March - April', timing:'Spring or Fall', height:'50 - 75ft', notes:'broad range of soils and habitats. berries consumed by over 50 species of birds; berries have culinary use; Heartwood is light, strong, durable, and widely used for cedar chests, cabinets, lead pencils, fuel, and fence posts; birds pass the seeds thr' },
+  { id:'ap064', name:'American water-willow', sci:'Justicia americana', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'High', season:'June - October', timing:'Spring or Fall', height:'1 - 3ft', notes:'muddy margins of shallow freshwater streams, lakes, ponds; wet shores. has underground stems and forms colonies' },
+  { id:'as015', name:'sheep laurel', sci:'Kalmia angustifolia', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'2 - 3ft', notes:'acid or sterile soils; old wet pastures, barrens, slow wooded streams, swamp borders, bogs, wet thickets. foliage poisonous to hoofed browsers (not eaten by deer). Fall color: evergreen' },
+  { id:'ap065', name:'seashore mallow', sci:'Kosteletzkya virginica', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'High', season:'July - September', timing:'Spring or Fall', height:'1.5 - 4.5ft', notes:'irregularly flooded salt and brackish marshes, above Mean High tide to spring tide level. common near the coast; looks similar to Hibiscus; tolerates salinity to 10 ppt' },
+  { id:'ag027', name:'rice cutgrass', sci:'Leersia oryzoides', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'June - October', timing:'Spring or Fall', height:'5 - 5ft', notes:'fresh tidal and nontidal marshes, wet meadows, ditches and muddy shores. good for sediment stabilization, erosion control; tolerates drought; tolerates flooding to 6"' },
+  { id:'ap066', name:'round-head bush clover', sci:'Lespedeza capitata', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'July - September', timing:'Spring or Fall', height:'2 - 6ft', notes:'dry old fields and thin woods' },
+  { id:'as016', name:'fetterbush', sci:'Leucothoe racemosa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'13 - 13ft', notes:'swamps, moist woods and thickets. zig-zag twigs, reddish or greenish; tends to sucker, forming thickets' },
+  { id:'ag028', name:'grass-leaf blazingstar', sci:'Liatris pilosa var. pilosa', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'open woodlands or borders; edges of salt marsh and dune hollows' },
+  { id:'ag029', name:'eastern blazing star', sci:'Liatris scariosa', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'August - September', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'dry upland woodlands' },
+  { id:'ag030', name:'plains blazing star', sci:'Liatris squarrosa', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium', season:'July - September', timing:'Spring or Fall', height:'0.5 - 2.5ft', notes:'dry open fields and banks. RT&E in MD' },
+  { id:'ap067', name:'wood Lily', sci:'Lilium philadelphicum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'June - August', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'open woods and borders, thickets. RT&E in MD, S3 rare to uncommon in VA' },
+  { id:'ap068', name:'Turk\'s cap lily', sci:'Lilium superbum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - August', timing:'Spring or Fall', height:'4 - 8ft', notes:'wet meadows and along streams. leaves in whorl around stem; takes several years to bloom' },
+  { id:'ap069', name:'sea lavender', sci:'Limonium carolinianum', emoji:'🌿', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Medium–High', season:'July - October', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'irregularly flooded high salt marsh. tolerates salinity to 30 ppt; obligate wetland species, can take saline conditions' },
+  { id:'at029', name:'tulip tree', sci:'Liriodendron tulipifera', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium', season:'June - June', timing:'Spring or Fall', height:'70 - 100ft', notes:'bottomlands in wet to mesic woods, mountain coves, and lower slopes. fast growth; Used for veneer, furniture, house siding and construction; a useful fast-growing timber tree; one of the tallest eastern trees; is second to only to Sycamore in trunk d' },
+  { id:'ap070', name:'lupine', sci:'Lupinus perennis', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - July', timing:'Spring or Fall', height:'1 - 2ft', notes:'dry open woods, edges and fields; roadsides; stream banks. prefers acidic soil' },
+  { id:'as017', name:'male-berry', sci:'Lyonia ligustrina', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'6 - 12ft', notes:'open areas, swamps, moist woods. berry-like capsules persist through winter. Fall color: orange to red' },
+  { id:'as018', name:'stagger-bush', sci:'Lyonia mariana', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'0.5 - 6.5ft', notes:'swamps, moist or dry forests, especially on sandy soils. interesting woody capsules persist through winter. Fall color: red' },
+  { id:'at030', name:'cucumber magnolia', sci:'Magnolia acuminata', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'70 - 100ft', notes:'rich, mesic slopes, ravines, valleys, and along streams. Wood is of some commercial value for interiors, cabinet making and woodenware; used infrequently as an ornamental; twigs eaten by deer. Fall color: ashy brown' },
+  { id:'at031', name:'sweetbay magnolia', sci:'Magnolia virginiana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'12 - 30ft', notes:'forested wetlands, seeps, stream and pond borders, moist sandy woods. semi-evergreen; fragrant flowers; tolerates occasional flooding, some salt; Used as an ornamental. Fall color: semi-evergreen' },
+  { id:'ap071', name:'Canada mayflower', sci:'Maianthemum canadense', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'woodlands. fragrant flowers' },
+  { id:'ap072', name:'false Solomon\'s seal', sci:'Maianthemum racemosum ssp. racemosum', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'dry to moist woods, clearings, bluffs. flowers in plume-like clumps at tip of stem; herbal uses' },
+  { id:'ap073', name:'Indian cucumber', sci:'Medeola virginiana', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'moist woods. rhizome is edible' },
+  { id:'av007', name:'climbing hempvine', sci:'Mikania scandens', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Part Sun', water:'Medium–High', season:'June - October', timing:'Spring or Fall', height:'15 - 15ft', notes:'swamps and moist thickets. vines herbaceous, not woody; OBL (possible browse/graze food source)' },
+  { id:'ap074', name:'monkeyflower', sci:'Mimulus ringens', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'June - October', timing:'Spring or Fall', height:'1 - 3ft', notes:'wet, open grounds of swamps, meadows, & shores. interesting flowers; OBL; .2\'-.4\' accding to Gray\'s, R&B.. 1\'-3\' many other sources.' },
+  { id:'ap075', name:'partridgeberry', sci:'Mitchella repens', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May - July', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'dry acid woodland soils. two flowers form one fruit; berry edible; slow creeper, forms mats under trees. Fall color: evergreen' },
+  { id:'ap076', name:'twoleaf miterwort', sci:'Mitella diphylla', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'rich, moist woods. FACU' },
+  { id:'ap077', name:'wild bergamot', sci:'Monarda bradburiana', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - September', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'fields, thickets, roadsides, woodland borders. often confused with bee-balm (M. didyma); aromatic; tolerates dry soils; herbal uses; UPL' },
+  { id:'ap078', name:'beebalm', sci:'Monarda didyma', emoji:'🌺', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'2 - 5ft', notes:'creek banks, floodplains, moist woods. showy flowers; aromatic; herbal uses; FAC+' },
+  { id:'ap079', name:'horsemint', sci:'Monarda punctata', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'June - October', timing:'Spring or Fall', height:'0.5 - 3.5ft', notes:'dry open sandy fields. UPL' },
+  { id:'as019', name:'southern or swamp bayberry', sci:'Morella caroliniensis', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'April - June', timing:'Spring or Fall', height:'8 - 12ft', notes:'dry or moist thickets and woods, bogs. glossy dark green leaves, leaves larger than M. cerifera, plants fuller. Fall color: evergreen' },
+  { id:'at032', name:'wax myrtle', sci:'Morella cerifera', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'March - June', timing:'Spring or Fall', height:'6 - 15ft', notes:'tidal and nontidal fresh and brackish marshes, swamps, sandy dune swales, upland hardwood forests. fragrant; loses leaves north and west of Ches. Bay, MD north; may reach 30 feet; can be pruned as hedge; nitrogen fixer; tolerates salinity to 10 ppt; ' },
+  { id:'as020', name:'northern bayberry', sci:'Morella pensylvanica', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'March - April', timing:'Spring or Fall', height:'5 - 10ft', notes:'tidal and nontidal fresh and brackish marshes and swamps, sand flats and dunes. fragrant leaves; tends to sucker and form large colonies; waxy berries persist through winter; tolerates salinity to 20 ppt; Often planted as an ornamental; many songbird' },
+  { id:'ap080', name:'spatterdock', sci:'Nuphar lutea', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'May - October', timing:'Spring or Fall', height:'1 - 1.5ft', notes:'fresh tidal and nontidal marshes, swamps, ponds. large leaves floating but rooted; fruit berry-like, many seeded, somewhat flattened, leathery' },
+  { id:'ap081', name:'blue toadflax', sci:'Nuttallanthus canadensis', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - September', timing:'Spring or Fall', height:'0.5 - 2.5ft', notes:'maritime grassland, maritime shrubland, successional shrubland; dry or poor soils of fields; forests, sandy fields. delicate flowers; prefers well-drained soil' },
+  { id:'ap082', name:'fragrant water lily', sci:'Nymphaea odorata', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'1 - 4ft', notes:'tidal and nontidal fresh waters, shallow lakes and ponds. large leaves floating but rooted; fruit berry-like, many seeded, somewhat flattened, leathery' },
+  { id:'ap083', name:'narrow-leaved sundrops', sci:'Oenothera fruticosa', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May - September', timing:'Spring or Fall', height:'1 - 3ft', notes:'fields, meadows, roadsides. FAC' },
+  { id:'ap084', name:'sundrops', sci:'Oenothera perennis', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low–Medium', season:'May - August', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'shaly slopes, moist or dry fields, pastures and roadsides. similar to evening primrose (O. biennis); long bloom time; spreader; FAC-' },
+  { id:'af009', name:'sensitive fern', sci:'Onoclea sensibilis', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part/Shade', water:'Medium–High', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'fresh tidal and nontidal marshes, wet meadows, swamps, moist woods. spreads in wet areas; fertile fronds dark brown, erect; can be poisonous to older horses' },
+  { id:'ap085', name:'eastern prickly-pear cactus', sci:'Opuntia humifusa', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'June - July', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'sandy coastal dunes or shaly soils. fruit edible, used for jelly' },
+  { id:'ap086', name:'golden club', sci:'Orontium aquaticum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'High', season:'April - June', timing:'Spring or Fall', height:'1.5 - 2ft', notes:'shores of regularly flooded tidal fresh marshes; shallow waters and inland shores. fruit is a thick fleshy spike covered with small dark green berry-like structures' },
+  { id:'ap087', name:'sweet cicely', sci:'Osmorhiza longistylis', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'1.5 - 4ft', notes:'rich moist woods & wooded slopes, thickets. all plant parts have anise scent; FACU' },
+  { id:'af010', name:'cinnamon fern', sci:'Osmunda cinnamomea', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part/Shade', water:'Medium–High', timing:'Spring or Fall', height:'2 - 5ft', notes:'wet woods, marshes, swamps, bogs, along streams. tolerates drought; fertile fronds reddish brown, wooly' },
+  { id:'af011', name:'interrupted fern', sci:'Osmunda claytoniana', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium', timing:'Spring or Fall', height:'1 - 4ft', notes:'open pasture fields, borders of woods and swampy areas. grows in clumps' },
+  { id:'af012', name:'royal fern', sci:'Osmunda regalis', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part/Shade', water:'High', timing:'Spring or Fall', height:'1.5 - 6ft', notes:'fresh tidal and nontidal marshes and swamps, woods, irregularly, seasonally, or permanently saturated (up to 100% of growing season). tolerates full sun if moist; tolerates drought; tolerates irregular, seasonal or permanent saturation; only tolerate' },
+  { id:'ap088', name:'violet wood sorrel', sci:'Oxalis violacea', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - July', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'woods' },
+  { id:'ag031', name:'bitter or coastal panic grass', sci:'Panicum amarum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'1 - 3ft', notes:'sandy coastal shores and dunes. prostrate form, produces little viable seed, use transplants; Panicum amarum var. amarulum (coastal panicgrass), taller form, can be seeded.' },
+  { id:'av008', name:'Virginia creeper', sci:'Parthenocissus quinquefolia', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'June - August', timing:'Spring or Fall', height:'45 - 45ft', notes:'fence rows, woodland edges, open woods, alluvial woods, ravines and bluffs, rich deep woods, cliffs. bank stabilizer; control by trimming; fruits eaten by variety of wildlife; purple to crimson fall color; Fruits consumed by numerous birds, including' },
+  { id:'av009', name:'passionflower', sci:'Passiflora incarnata', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full Sun', water:'Low–Medium', season:'June - September', timing:'Spring or Fall', height:'6 - 18ft', notes:'open, cultivated fields, rocky slopes, thin woods, roadsides, fencerows, and thickets. herbaceous vine; large fleshy berry edible; fragrant' },
+  { id:'ap089', name:'arrow arum', sci:'Peltandra virginica', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'April - July', timing:'Spring or Fall', height:'2 - 2ft', notes:'fresh to moderately brackish tidal and nontidal marshes, swamps, shallow waters of lakes and ponds. globular head of berries enclosed in green leathery case, curved downward; tolerates salinity to 2 ppt' },
+  { id:'ap090', name:'beardtongue', sci:'Penstemon digitalis', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - August', timing:'Spring or Fall', height:'2 - 5ft', notes:'open woods, meadows. tolerates poor drainage; variety of cultivars; may not be true native to MD, VA, etc., original indigenous area largely in Mississippi Basin, has spread to much of east coast; FAC' },
+  { id:'ap091', name:'smooth beardtongue', sci:'Penstemon laevigatus', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'rich woods and fields. FACU' },
+  { id:'ap092', name:'thick-leaved phlox', sci:'Phlox carolina', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'open woods. Fall color: evergreen' },
+  { id:'ap093', name:'woodland phlox', sci:'Phlox divaricata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'1.5 - 1.5ft', notes:'rich moist woods. aromatic; showy flower; dormant in summer (leaves disappear); frequently cultivated; evergree; often covers large areas' },
+  { id:'ap094', name:'summer phlox', sci:'Phlox paniculata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'July - October', timing:'Spring or Fall', height:'1.5 - 6.5ft', notes:'rich moist soils in open woods or along roadsides; stream banks & thickets. aromatic; showy flowers frequently escapes from cultivation' },
+  { id:'ap095', name:'creeping phlox', sci:'Phlox stolonifera', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'rich woodlands. uncommon to rare in MD. Fall color: semi-evergreen' },
+  { id:'ap096', name:'moss phlox', sci:'Phlox subulata', emoji:'🌺', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'April - June', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'rock crevices, ledges, dry soils. nice rock garden plant. Fall color: evergreen' },
+  { id:'as021', name:'black chokeberry', sci:'Photinia melanocarpa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'3 - 6ft', notes:'bog, swamp, spring, dune, cliff, old field, clearings; wet or dry thickets, creek banks, wet acid sand, balds; thin soils and rock outcroppings. can be pruned as hedge; berries edible for humans. Fall color: crimson red' },
+  { id:'as022', name:'red chokeberry', sci:'Photinia pyrifolia', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'March - May', timing:'Spring or Fall', height:'1.5 - 13ft', notes:'forested seasonal wetlands, shrub bogs; upland forest, old field, dune. tolerates infrequent flooding by water with some salt; can be pruned as hedge. Fall color: orange to red' },
+  { id:'as023', name:'ninebark', sci:'Physocarpus opulifolius', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'5 - 12ft', notes:'moist thickets, along streams in sand or gravel bars, rocky slopes. papery bark continually molts in thin strips; very drought tolerant; adaptable. Fall color: yellow to purple' },
+  { id:'at033', name:'shortleaf pine', sci:'Pinus echinata', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', timing:'Spring or Fall', height:'100 - 100ft', notes:'dry rocky mountain ridges, old fields, floodplains. best used for naturalizing; Wood used for home construction and pulpwood; not desirable as an ornamental because of the abundant litter and falling leaves; will sprout freely at base if cut or fire-' },
+  { id:'at034', name:'pitch pine', sci:'Pinus rigida', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low', season:'May - May', timing:'Spring or Fall', height:'50 - 75ft', notes:'slopes and ridges of mountains, river valleys, and swamps. many birds feed on the seeds; provides winter cover; old trees are fire resistant due to thick bark; Wood used for lumber, fuel, and pulpwood; little used as an ornamental; young trees will s' },
+  { id:'at035', name:'pond pine', sci:'Pinus serotina', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', timing:'Spring or Fall', height:'50 - 60ft', notes:'swamps, pocosins, bays, pond margins, poorly drained flatwoods. many birds feed on the seeds; provides winter cover; Mostly used for pulpwood; large trees may be used for lumber; important to wildlife; many song birds and game birds feed on the seeds' },
+  { id:'at036', name:'white pine', sci:'Pinus strobus', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'May - July', timing:'Spring or Fall', height:'75 - 100ft', notes:'variety of sites; does best on moist, well drained, sandy loam soils of ridges. many birds feed on the seeds; provides winter cover; Much planted as an ornamental; wood used for house construction, cabinet work, and interior finishing; knotty boards ' },
+  { id:'at037', name:'loblolly pine', sci:'Pinus taeda', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', timing:'Spring or Fall', height:'70 - 90ft', notes:'deep poorly drained floodplains & old fields to well drained slopes. many birds feed on the seeds; provides winter cover; An excellent species for wood production; excellent for home and general construction, especially for framing; important to wild' },
+  { id:'at038', name:'Virginia pine', sci:'Pinus virginiana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', timing:'Spring or Fall', height:'50 - 80ft', notes:'well drained sites; often a pioneer species. many birds feed on the seeds; provides winter cover; Used for pulpwood; important to wildlife; many song birds and game birds feed on the seeds; rodents, including squirrels and rabbits, eat seeds, bark an' },
+  { id:'at039', name:'American sycamore', sci:'Platanus occidentalis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'April - June', timing:'Spring or Fall', height:'75 - 100ft', notes:'alluvial soils of river bottoms & lake shores. leafs out late spring; showy bark; leaves may persist into winter; Wood used for furniture, boxes, pulpwood and butchers\' blocks; important to wildlife; many song birds and game birds feed on the seeds;' },
+  { id:'ap097', name:'Mayapple', sci:'Podophyllum peltatum', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'1 - 2ft', notes:'rich moist woods & open fields. ripe fruit edible; woodland groundcover; mottled foliage' },
+  { id:'ap098', name:'Jacob\'s ladder', sci:'Polemonium reptans', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - August', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'rich moist or rocky woods, wooded floodplains. attractive flowers; slow spreader; herbal uses; FACU' },
+  { id:'ap099', name:'Solomon\'s seal', sci:'Polygonatum biflorum', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 6.5ft', notes:'dry to moist woods. flowers dangle along stalk; FACU' },
+  { id:'ap100', name:'Solomon\'s seal', sci:'Polygonatum pubescens', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'dry to moist woods. herbal uses; edible' },
+  { id:'af013', name:'Christmas fern', sci:'Polystichum acrostichoides', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'woods, thickets, and rocky slopes. grows in clumps; easily grown in rock gardens and shaded places; impartial to soil type. Fall color: evergreen' },
+  { id:'ap101', name:'pickerelweed', sci:'Pontederia cordata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'June - November', timing:'Spring or Fall', height:'3.5 - 3.5ft', notes:'fresh to moderately brackish water, tidal and nontidal marshes, shallow water of ponds and lakes. spreads vigorously; a small bladder-like structure crested with toothed ridges holds one seed; tolerates salinity to 3 ppt' },
+  { id:'at040', name:'eastern cottonwood', sci:'Populus deltoides', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', season:'March - April', timing:'Spring or Fall', height:'75 - 100ft', notes:'prefers moist situations along waterways but tolerates dry soils; most common on moist alluvial soils. best used for naturalizing; grows fast but short lived; Is sometimes planted for shade or used in shelter belts where rapid growth is desired; twig' },
+  { id:'at041', name:'swamp cottonwood', sci:'Populus heterophylla', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'High', season:'March - March', timing:'Spring or Fall', height:'80 - 80ft', notes:'waterlogged clay soils on edges of swamps and bottomlands. A source of lumber; twigs and leaves are eaten by deer, field mice and rabbits; seeds , buds and twigs are eaten by numerous birds and mammals, including ruffed, spruce and sharptail grouse, ' },
+  { id:'ap102', name:'Bowman\'s root', sci:'Porteranthus trifoliatus', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'May - July', timing:'Spring or Fall', height:'1.5 - 4ft', notes:'open upland woods and clearings, rocky slopes, roadsides. established plants drought tolerant; spreads to form tight clumps; seldom needs dividing; yellow fall color; throughout PA, in MD primarily in mountains,. Fall color: yellow' },
+  { id:'at042', name:'American wild plum', sci:'Prunus americana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'20 - 35ft', notes:'rocky or sandy soils along streams, woodlands, pastures, fencerows. edible fruit, used for making pies and jellies; 15-25ht? PA=tall shrub?. Fall color: pale yellow' },
+  { id:'as024', name:'beach plum', sci:'Prunus maritima', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'1 - 8ft', notes:'sandy, rocky soils along the coast, ocean dunes; also dry roadside banks and hedgerows. edible fruit, prized for jams and jellies; salt tolerant; Sometimes used in ornamental plantings' },
+  { id:'at043', name:'pin cherry', sci:'Prunus pensylvanica', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low', season:'May - May', timing:'Spring or Fall', height:'20 - 35ft', notes:'wooded areas; pioneer species after fires. Fruits eaten by many species of birds and the seeds by small rodents. Fall color: yellow' },
+  { id:'at044', name:'black cherry', sci:'Prunus serotina', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'40 - 75ft', notes:'dry to mesic forests, fence rows, old fields, edges of woods. birds eat fruit; Wood used for furniture making and as veneer for plywood; fruits can be eaten by humans; leaves, especially if wilted, are extremely poisonous if eaten by farm animals, du' },
+  { id:'at045', name:'choke cherry', sci:'Prunus virginiana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'25 - 50ft', notes:'open sites in moist soils; pioneer species after fires. fast growing, short lived; fruit sometimes used for making jelly. Fall color: dark red-purple' },
+  { id:'af014', name:'bracken fern', sci:'Pteridium aquilinum', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'1.5 - 6ft', notes:'dry pine woods, wet swamps and marshes, old fields, waste places. forms large colonies; host for several ant types' },
+  { id:'ap103', name:'hoary mountain mint', sci:'Pycnanthemum incanum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade', water:'Low', season:'July - September', timing:'Spring or Fall', height:'3 - 3ft', notes:'upland woods, old fields, thickets, barrens. VA: MPC (Mtn only in MD guide)' },
+  { id:'ap104', name:'narrow-leaved mountain mint', sci:'Pycnanthemum tenuifolium', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - September', timing:'Spring or Fall', height:'1.5 - 2.5ft', notes:'moist old fields, sandy stream banks, floodplains. FACW' },
+  { id:'at046', name:'white oak', sci:'Quercus alba', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'March - May', timing:'Spring or Fall', height:'75 - 100ft', notes:'dry to mesic woods. acorns popular wildlife food; edible nuts; majestic; state tree of Maryland, leaves may persist into winter; Wood used for railroad ties, mine timbers, flooring, charcoal, furniture, barrels for aging whiskey, pulpwood and fuel; d' },
+  { id:'at047', name:'swamp white oak', sci:'Quercus bicolor', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'High', season:'May - May', timing:'Spring or Fall', height:'60 - 100ft', notes:'low, wet bottomlands, edges of swamps and streams. acorns food for wildlife; Wood used for railroad ties and woodworking; deer browse the leaves and twigs; the acorns are eaten by deer, black bear, racoon, all the squirrels, and even by rabbit and op' },
+  { id:'at048', name:'scarlet oak', sci:'Quercus coccinea', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'40 - 75ft', notes:'xeric uplands and slopes. acorns food for wildlife; Leaves turn rich red in autumn; attractive as an ornamental but difficult to transplant; deer browse the leaves and twigs; the acorns are eaten by deer, black bear, racoon, all the squirrels, and ev' },
+  { id:'at049', name:'southern red oak', sci:'Quercus falcata', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'70 - 80ft', notes:'well-drained, fertile, dry to mesic uplands. acorns food for wildlife; Wood used as lumber when durability is not required, also as fuel; the bark has been used in tanning leather; deer browse the leaves and twigs; the acorns are eaten by deer, black' },
+  { id:'at050', name:'bear oak', sci:'Quercus ilicifolia', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low', season:'May - June', timing:'Spring or Fall', height:'12 - 20ft', notes:'barrens, bald, forest, dune, old fields. leaves may persist into winter. Fall color: yellow, scarlet red to purplish' },
+  { id:'at051', name:'blackjack oak', sci:'Quercus marilandica', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Part Sun', water:'Low', season:'April - June', timing:'Spring or Fall', height:'35 - 50ft', notes:'open, dry woodlands, ridges, slopes, and sandy flatwoods. acorns food for wildlife, leaves may persist into winter; Wood used mostly for fuel; deer browse the leaves and twigs; the acorns are eaten by deer, black bear, racoon, all the squirrels, and ' },
+  { id:'at052', name:'swamp chestnut oak', sci:'Quercus michauxii', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', season:'May - May', timing:'Spring or Fall', height:'50 - 80ft', notes:'bottomlands, ravine slopes, flatwoods over limestone. acorns food for wildlife; Nuts sweet and edible; wood used for construction, fuel; an important timber tree of the southeastern states; deer browse the leaves and twigs; the acorns are eaten by de' },
+  { id:'at053', name:'Chinquapin oak', sci:'Quercus muehlenbergii', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'35 - 50ft', notes:'rich, moist woods; well drained soils of on uplands sites, limestone outcrops, dry bluffs, slopes. Deer browse the leaves and twigs and take cover in "redbrush " stands of young oaks that retain their leaves through the winter. The acorns are eaten b' },
+  { id:'at054', name:'water oak', sci:'Quercus nigra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'50 - 80ft', notes:'mixed upland woods, bottomlands, hammocks and old fields. acorns food for wildlife; Occasionally used in landscape planting; deer browse the leaves and twigs; the acorns are eaten by deer, black bear, racoon, all the squirrels, and even by rabbit and' },
+  { id:'at055', name:'pin oak', sci:'Quercus palustris', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'50 - 80ft', notes:'wet to mesic bottomlands or upland flats. popular shade tree; fall color; acorns food for wildlife; leaves may persist into winter; Widely planted as an ornamental but difficult to transplant; deer browse the leaves and twigs; the acorns are eaten by' },
+  { id:'at056', name:'willow oak', sci:'Quercus phellos', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'February - May', timing:'Spring or Fall', height:'80 - 100ft', notes:'bottomlands or low flatwoods and upland old fields. acorns food for wildlife; Wood used for lumber and construction timber; frequently used in ornamental planting; deer browse the leaves and twigs; the acorns are eaten by deer, black bear, racoon, al' },
+  { id:'at057', name:'chestnut oak', sci:'Quercus prinus', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'Low', season:'May - June', timing:'Spring or Fall', height:'40 - 80ft', notes:'xeric rocky ridges and upper slopes; also mesic sites. acorns food for wildlife; fall color; Wood used as low grade lumber, for charcoal and pulpwood; bark used in tanning as a source of tannic acid; deer browse the leaves and twigs; the acorns are e' },
+  { id:'at058', name:'northern red oak', sci:'Quercus rubra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'90 - 90ft', notes:'mesic, well drained slopes, coves, and drier ridges. acorns food for wildlife; hardy and long-lived; fall color; Wood has many uses such as flooring, finishing work, mine timbers, railroad ties, pulpwood and charcoal; it is a valuable, quick growing ' },
+  { id:'at059', name:'post oak', sci:'Quercus stellata', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'35 - 50ft', notes:'upland dry ridges to more mesic flatwoods. acorns food; Wood resists decay well when used as posts and railroad ties; deer browse the leaves and twigs; the acorns are eaten by deer, black bear, racoon, all the squirrels, and even by rabbit and opossu' },
+  { id:'at060', name:'black oak', sci:'Quercus velutina', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'75 - 100ft', notes:'xeric upland ridges and slopes; also mesic flatwoods. acorns food for wildlife; leaves may persist into winter; Wood used for charcoal and mine timbers, cross ties, lumber, and pulpwood; bark can be used for tanning; deer browse the leaves and twigs;' },
+  { id:'ap105', name:'Virginia meadow-beauty', sci:'Rhexia virginica', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'moist open areas on sandy soils. also R. mariana for MD; OBL' },
+  { id:'as025', name:'dwarf or coast azalea', sci:'Rhododendron atlanticum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'coastal, sandy soils; rare in moist woods. flowers very fragrant; colonial, arising from spreading underground stems;' },
+  { id:'as026', name:'flame azalea', sci:'Rhododendron calendulaceum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Part Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'5 - 9ft', notes:'open oak woods, dry rocky woodlands, damp slopes, rocky mountain stream banks, heath balds. highly rare in MD, possibly extirpated PA. Fall color: yellow green' },
+  { id:'as027', name:'sweet azalea', sci:'Rhododendron canescens', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'3 - 10ft', notes:'moist woods. possibly rare in MD' },
+  { id:'at061', name:'great laurel', sci:'Rhododendron maximum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'May - August', timing:'Spring or Fall', height:'15 - 20ft', notes:'cool mountain slopes, moist woods, sheltered coves and ravines, along creeks. needs space; may form dense thicket; when in full bloom, a rhododendron-covered slope is beautiful. Frequently cultivated for ornament. The hard wood may be used for tool h' },
+  { id:'as028', name:'pinxterbloom', sci:'Rhododendron periclymenoides', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'3 - 10ft', notes:'moist to dry rocky or sandy woods, low swampy areas, limestone cliffs, rich cove forests; thin soils over bedrock. will tolerate thin soils over bedrock; open, airy quality; susceptible to disease and insects. Fall color: dull yellow' },
+  { id:'as029', name:'rose azalea', sci:'Rhododendron prinophyllum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'2 - 8ft', notes:'Rocky woods, rich woods, high altitudes. may reach 15 feet tall, but rarely; flowers have clove-like scent' },
+  { id:'as030', name:'swamp azalea', sci:'Rhododendron viscosum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - August', timing:'Spring or Fall', height:'6.5 - 10ft', notes:'low wet floodplain woods and depressions, sluggish streambanks, swamp borders, hillside bogs, ditch banks, clearings. attractive spreading, loose-branched habit; demands acid soil; susceptible to disease and insects. Fall color: yellow, orange, to pu' },
+  { id:'as031', name:'sweet or smooth sumac', sci:'Rhus glabra', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'Low–Medium', season:'June - July', timing:'Spring or Fall', height:'2 - 20ft', notes:'dry or moist soils in open areas; shale barrens, old fields, dry open slopes, roadsides, fencerows. fuzzy berry clusters; male and female may be on separate plants; extremely drought resistant; All of our upland gamebirds and many species of songbird' },
+  { id:'at062', name:'staghorn sumac', sci:'Rhus hirta', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Low–Medium', season:'June - July', timing:'Spring or Fall', height:'35 - 50ft', notes:'dry or moist, poor or fertile soils of old fields, roadsides, woods edges. spreads by lateral roots to form colonies; female plants produce seed; winter food for wildlife. Fall color: orange-red' },
+  { id:'as032', name:'Appalachian or eastern gooseberry', sci:'Ribes rotundifolium', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Part Sun', water:'Low', season:'May - July', timing:'Spring or Fall', height:'3 - 6ft', notes:'rocky upland woods. do not use near apple orchards; may spread cedar apple rust. Fall color: red' },
+  { id:'as033', name:'pasture rose', sci:'Rosa carolina', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'dry old fields or open woods; rocky banks, shale barrens. edible fruit is a berry-like hip; thorns; Browsed by deer; fruits eaten by ruffed grouse, quail and a few species of songbirds. Fall color: yellowish to orange' },
+  { id:'as034', name:'swamp rose', sci:'Rosa palustris', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'High', season:'June - August', timing:'Spring or Fall', height:'8 - 8ft', notes:'fresh tidal and nontidal marshes, forested wetlands, shrub swamps, stream banks; open or shaded areas. edible fruit is a berry-like hip; thorns; tolerates flooding to 3"; The wild roses are browsed by deer; the fruits are eaten by ruffed grouse, quai' },
+  { id:'ap106', name:'tall coneflower', sci:'Rudbeckia laciniata', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'1.5 - 10ft', notes:'floodplains, stream banks, wet fields. herbal uses' },
+  { id:'ap107', name:'three-lobed coneflower', sci:'Rudbeckia triloba', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - October', timing:'Spring or Fall', height:'1.5 - 4.5ft', notes:'old fields, open woods, rocky slopes. FACU' },
+  { id:'ap108', name:'Carolina wild petunia', sci:'Ruellia caroliniensis', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'May - August', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'woodlands, roadsides, thickets and waste places. actually in the nightshade family, flower fragile; a highly variable species; probably extirpated in PA' },
+  { id:'ap109', name:'rose pink', sci:'Sabatia angularis', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'July - October', timing:'Spring or Fall', height:'1 - 3ft', notes:'moist open woods, fields, marshes, and moist meadows; uplands & shores. FAC+' },
+  { id:'ap110', name:'duck potato', sci:'Sagittaria latifolia', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'July - September', timing:'Spring or Fall', height:'0.5 - 4ft', notes:'fresh tidal and nontidal marshes, swamps, borders of lakes, streams, and ponds' },
+  { id:'as035', name:'prairie willow', sci:'Salix humilis', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'6 - 12ft', notes:'dry thickets, openings & plains; boggy swales; rocky mountain ridges, barrens; meadows; roadsides. typically spreads up to twice it\'s height; flowers are catkins. Fall color: dull yellow' },
+  { id:'at063', name:'black willow', sci:'Salix nigra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'High', season:'March - April', timing:'Spring or Fall', height:'35 - 50ft', notes:'fresh tidal marshes, fresh tidal swamps, forested wetlands, floodplains, wet meadows; regularly to permanently flooded. streambank stabilizer; spreads by suckers; preferred food of ruffed grouse and pine grosbeak; tolerates flooding; tolerates salini' },
+  { id:'at064', name:'silky willow', sci:'Salix sericea', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'June - July', timing:'Spring or Fall', height:'12 - 12ft', notes:'Marshes, ditches, low woods. Mts. & Pied. OBL. Fall color: yellow' },
+  { id:'ap111', name:'lyre-leaf sage', sci:'Salvia lyrata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 2ft', notes:'moist pastures, upland woods, thickets, waste areas. UPL' },
+  { id:'as036', name:'common elderberry', sci:'Sambucus nigra ssp. canadensis', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'June - July', timing:'Spring or Fall', height:'6 - 12ft', notes:'fresh tidal and nontidal marshes, swamps, wet meadows, moist woods, old fields. berries eaten by 48 species of birds; Berries used for jellies, pies, and wines; the blossoms may be used for wine and mixed in batter to make muffins and pancakes; fruit' },
+  { id:'as037', name:'red elderberry', sci:'Sambucus racemosa var. racemosa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade', water:'Low–Medium', season:'May - May', timing:'Spring or Fall', height:'6 - 12ft', notes:'deep, rich woods, dry rocky woods, along quick flowing creeks, moist rock crevices, sheltered coves and ravines. important summer wildlife food; one of earliest blooming shrubs; fragrant; all parts poisonous to humans; grows in shallow soils over bed' },
+  { id:'ap112', name:'bloodroot', sci:'Sanguinaria canadensis', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'March - May', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'rich woods, open roadside banks. showy flowers, but blooms fleetingly; herbal uses' },
+  { id:'at065', name:'sassafras', sci:'Sassafras albidum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - April', timing:'Spring or Fall', height:'35 - 50ft', notes:'moist, well drained soils of open woodlands; sea-level to ~4430 feet. edible and medicinal uses; provides spring and fall color; Used in cabinet work and handicrafts; tea may be made by boiling pieces of the outer part of the bark; sassafras oil used' },
+  { id:'ap113', name:'lizard\'s tail', sci:'Saururus cernuus', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'1.5 - 4.5ft', notes:'fresh tidal and nontidal marshes and swamps, shallow water. fragrant flower; often forms extensive colonies' },
+  { id:'ap114', name:'eastern swamp saxifrage', sci:'Saxifraga pensylvanica', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'High', season:'April - June', timing:'Spring or Fall', height:'1 - 3ft', notes:'wet woods, bogs, swamps' },
+  { id:'ap115', name:'early saxifrage', sci:'Saxifraga virginiensis', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'March - May', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rock crevices, dry slopes, woodlands. FAC-' },
+  { id:'ag032', name:'common three-square', sci:'Schoenoplectus pungens var. pungens', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'4 - 4ft', notes:'fresh and brackish tidal and nontidal marshes, wet sandy shores, shallow water. spike above flower is up to 5 inches tall; tolerates salinity to 15 ppt' },
+  { id:'ag033', name:'great bulrush', sci:'Schoenoplectus validus', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'6 - 10ft', notes:'fresh and brackish tidal and nontidal marshes, shores; margins of ponds, quiet waters; deep emergent marsh, shallow emergent marsh. spreads rapidly; tolerates salinity to 5 ppt' },
+  { id:'ag034', name:'black or green bulrush', sci:'Scirpus atrovirens', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'June - August', timing:'Spring or Fall', height:'3 - 6ft', notes:'shallow emergent marsh, shrub swamp, floodplain forest, hardwood swamp; swamps, bogs, wet meadows, swales, ditches. grows in clumps or sod-forming' },
+  { id:'ag035', name:'woolgrass', sci:'Scirpus cyperinus', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'August - September', timing:'Spring or Fall', height:'4 - 5ft', notes:'fresh tidal and nontidal marshes, swamps, forested wetlands, wet meadows, ditches, ponds, bogs; seasonally flooded. grows in large clumps, often extensive colonies' },
+  { id:'ap116', name:'rough skullcap', sci:'Scutellaria integrifolia', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'swamps, bogs, moist woods, fields. b&b: dry or wet soils; r&B FACW' },
+  { id:'ap117', name:'mountain stonecrop', sci:'Sedum ternatum', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 0.5ft', notes:'damp rocks, undisturbed woodland; rocky banks, cliffs, woods. creeping stems; used in rock gardens. Fall color: evergreen' },
+  { id:'ap118', name:'Maryland wild senna', sci:'Senna marilandica', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - August', timing:'Spring or Fall', height:'3 - 6.5ft', notes:'dry roadsides, thickets, open woods. pods important food for upland gamebirds; FAC+' },
+  { id:'ap119', name:'wild pink', sci:'Silene caroliniana', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'dry open woods, rocky slopes, roadside banks, shale barrens. semi-evergreen; native to limestone areas. Fall color: semi-evergreen' },
+  { id:'ap120', name:'starry campion', sci:'Silene stellata', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'June - September', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'wooded slopes, roadside banks, barrens. drought-tolerant; naturalizes in woods' },
+  { id:'ap121', name:'fire pink', sci:'Silene virginica', emoji:'🌺', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - July', timing:'Spring or Fall', height:'1 - 3ft', notes:'upland woods, wooded slopes, stream banks, clearings' },
+  { id:'ap122', name:'cup plant', sci:'Silphium perfoliatum', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'3 - 8ft', notes:'floodplains, abandoned fields, moist meadows, woods. FACU' },
+  { id:'ag036', name:'blue-eyed grass', sci:'Sisyrinchium angustifolium', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'grassy areas, damp woods. grasslike leaves; also S. montanum in NY' },
+  { id:'ag037', name:'coastal blue-eyed grass', sci:'Sisyrinchium atlanticum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'0.5 - 2.5ft', notes:'marshes, meadows, low woods. leaves grasslike, more slender than S. angustifolium; FACW' },
+  { id:'ap123', name:'smooth carrion flower', sci:'Smilax herbacea', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Part Sun', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'3 - 9ft', notes:'damp thickets, moist woods, and floodplains. herbaceous, climbing vine, not prickly; flower malodorous; male and female plants separate; FAC' },
+  { id:'ap124', name:'bluestem goldenrod', sci:'Solidago caesia', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'rich deciduous woods. stems bluish or purplish' },
+  { id:'ap125', name:'Canada goldenrod', sci:'Solidago canadensis', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'1 - 6.5ft', notes:'fields and roadsides. FACU' },
+  { id:'ap126', name:'tall goldenrod', sci:'Solidago canadensis var. scabra', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - November', timing:'Spring or Fall', height:'3.5 - 6.5ft', notes:'woods, fields, riverbanks, roadsides' },
+  { id:'ap127', name:'broad leaf or zig zag goldenrod', sci:'Solidago flexicaulis', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'June - October', timing:'Spring or Fall', height:'1 - 3.5ft', notes:'moist woods and rocky wooded slopes. FACU' },
+  { id:'ap128', name:'early goldenrod', sci:'Solidago juncea', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low–Medium', season:'June - October', timing:'Spring or Fall', height:'1 - 4ft', notes:'fields, meadows, rocky slopes, roadsides' },
+  { id:'ap129', name:'gray goldenrod', sci:'Solidago nemoralis', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'June - November', timing:'Spring or Fall', height:'0.5 - 3ft', notes:'fields, open woods, roadsides, in dry sterile soils. tolerates poor soils' },
+  { id:'ap130', name:'sweet goldenrod', sci:'Solidago odora', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'dry open woods & barrens' },
+  { id:'ap131', name:'wrinkle-leaf goldenrod', sci:'Solidago rugosa', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'August - November', timing:'Spring or Fall', height:'1 - 6.5ft', notes:'fields, woods, floodplains, roadsides and waste places. tough plant; aggressive; strongly colonial' },
+  { id:'ap132', name:'seaside goldenrod', sci:'Solidago sempervirens', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - November', timing:'Spring or Fall', height:'1 - 6.5ft', notes:'coastal areas, dunes. coastal plant, may occur where road salts are used. Fall color: evergreen' },
+  { id:'ap133', name:'showy goldenrod', sci:'Solidago speciosa', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - October', timing:'Spring or Fall', height:'2 - 6.5ft', notes:'dry to moist open woods and fields. var speciosa (showy goldenrod) likes moist basic soils; Var. erecta (slender goldenrod) likes dry acidic soils' },
+  { id:'ag038', name:'Indiangrass', sci:'Sorghastrum nutans', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Low–Medium', season:'August - September', timing:'Spring or Fall', height:'2.5 - 8ft', notes:'dry slopes, prairies, borders of woods. tall clump grass with beautiful seed head; nutritious for livestock' },
+  { id:'ag039', name:'American bur-reed', sci:'Sparganium americanum', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'High', season:'May - August', timing:'Spring or Fall', height:'5 - 5ft', notes:'fresh nontidal marshes, shallow waters, muddy shores. good for sediment stabilization' },
+  { id:'ag040', name:'salt marsh or smooth cordgrass', sci:'Spartina alterniflora', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'July - September', timing:'Spring or Fall', height:'2 - 7ft', notes:'salt and brackish tidal marshes (mid-tide up to Mean High tide level). good for shore stabilization; important in seaside habitats; short form (<1.5 ft) found in irregularly flooded high marsh, tall form in regularly flooded low marsh; tolerates sali' },
+  { id:'ag041', name:'big cordgrass', sci:'Spartina cynosuroides', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'August - October', timing:'Spring or Fall', height:'3.5 - 10ft', notes:'fresh and brackish tidal marshes, near Mean High tide and above to spring tide level. soil stabilizer; not drought toleran; tolerates salinity to 10 ppt' },
+  { id:'ag042', name:'salt meadow hay', sci:'Spartina patens', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'July - September', timing:'Spring or Fall', height:'1 - 3ft', notes:'coastal salt and brackish tidal marshes; irregularly flooded high marsh at or above Mean High tide line. forms large mats; good for shore erosion control; tolerates salinity to 35 ppt' },
+  { id:'ag043', name:'freshwater cordgrass', sci:'Spartina pectinata', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'July - September', timing:'Spring or Fall', height:'4 - ft', notes:'brackish and fresh tidal and nontidal marshes, shores, wet meadows; upper half of intertidal zone and above to spring tide level. shore stabilizer; low drought tolerance; tolerates salinity to 3 ppt' },
+  { id:'as038', name:'broad-leaved meadow-sweet', sci:'Spiraea alba var. latifolia', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'Medium', season:'June - September', timing:'Spring or Fall', height:'3 - 6ft', notes:'bogs, moist woods, barrens, swamps. similar to S. alba but twigs more purplish or red; Browse for deer and protective cover; buds are eaten by ruffed and sharptail grouse and twigs by rabbit and deer. Fall color: yellow' },
+  { id:'as039', name:'steeplebush', sci:'Spiraea tomentosa', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full Sun', water:'Medium–High', season:'July - September', timing:'Spring or Fall', height:'3 - 6ft', notes:'wet meadows, moist old fields, bogs and swamps; lake edges, marshes, dunes, roadside swales. cultivars available with white or red flowers. Fall color: yellow green' },
+  { id:'ap134', name:'nodding ladies\'  tresses', sci:'Spiranthes cernua', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - November', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'moist acid soils of meadows, open woods, roadsides, bogs. orchid flowers; herbal uses' },
+  { id:'ap135', name:'hedge nettle', sci:'Stachys tenuifolia', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'June - August', timing:'Spring or Fall', height:'1.5 - 3.5ft', notes:'moist wooded bottomland, stream banks, wet meadows and fields. FACW+' },
+  { id:'as040', name:'American bladdernut', sci:'Staphylea trifolia', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Shade', water:'Medium', season:'May - May', timing:'Spring or Fall', height:'3 - 15ft', notes:'deep rich woods, floodplain forests, moist ravines, shores of lakes and ponds, rocky wooded streambanks, shaded dunes. fruit is 3-lobed, papery, balloon-like capsule; branches green-white striped. Fall color: yellow' },
+  { id:'ap136', name:'star chickweed', sci:'Stellaria pubera', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'March - June', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'moist woods & shaded rocky areas' },
+  { id:'ap137', name:'heart-leaved aster', sci:'Symphyotrichum cordifolium', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'August - October', timing:'Spring or Fall', height:'1 - 5ft', notes:'upland meadow, upland forests' },
+  { id:'ap138', name:'heath aster', sci:'Symphyotrichum ericoides var. ericoides', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'July - November', timing:'Spring or Fall', height:'0.5 - 6.5ft', notes:'dry fields, edge of woods, thickets. forms dense mounds; occurs in VA but listed as extremely rare (S1)' },
+  { id:'ap139', name:'smooth blue aster', sci:'Symphyotrichum laeve var. laeve', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'August - October', timing:'Spring or Fall', height:'1 - 5ft', notes:'dry open habitats, wood borders, etc' },
+  { id:'ap140', name:'New York aster', sci:'Symphyotrichum novi-belgii var. novi-belgii', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'July - October', timing:'Spring or Fall', height:'1 - 4.5ft', notes:'damp thickets, meadows, shores, etc' },
+  { id:'ap141', name:'skunk cabbage', sci:'Symplocarpus foetidus', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'High', season:'February - May', timing:'Spring or Fall', height:'1 - 3ft', notes:'fresh tidal and nontidal marshes and shrub swamps, forested wetlands, seeps. flower inconspicuous, emerges before leaves; sap has skunk-like odor' },
+  { id:'at066', name:'bald cypress', sci:'Taxodium distichum', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'High', season:'March - April', timing:'Spring or Fall', height:'50 - 100ft', notes:'brown and blackwater rivers, lake and pond margins, swamps, coastal marshes, pocosins, river bottoms. deciduous conifer. Fall color: purple to brown' },
+  { id:'ap142', name:'early meadow rue', sci:'Thalictrum dioicum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'rich rocky woods, ravines, alluvial terraces. FAC' },
+  { id:'ap143', name:'tall meadow rue', sci:'Thalictrum pubescens', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'June - August', timing:'Spring or Fall', height:'1.5 - 9ft', notes:'rich woods, low thickets, swamps, wet meadows, stream banks. foliage similar to columbines; clump-forming; delicate flowers; species very variable' },
+  { id:'ap144', name:'rue anemone', sci:'Thalictrum thalictroides', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'wooded banks and thickets. foliage similar to columbines' },
+  { id:'af015', name:'New York fern', sci:'Thelypteris noveboracensis', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'forested wetlands, dry to damp woods and thickets. tolerates drought; easily transplanted; forms large colonies; spreads easily' },
+  { id:'af016', name:'marsh fern', sci:'Thelypteris palustris', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Full/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'2 - 3ft', notes:'swamps, bogs, wet fields or thickets, fresh tidal and nontidal marshes, wooded streambanks. spreads' },
+  { id:'at067', name:'arborvitae', sci:'Thuja occidentalis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', season:'May - May', timing:'Spring or Fall', height:'50 - 75ft', notes:'wet calcareous areas. prefers wet calcareous areas; Used for shingles, lawn furniture, fences, and water tanks; used as an ornamental; much browsed by deer in northern states, especially in winter. Fall color: evergreen' },
+  { id:'ap145', name:'foamflower', sci:'Tiarella cordifolia', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium', season:'April - July', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rich woods, moist rocky wooded slopes. attractive, long-blooming; creeping, clump-forming; many cultivars' },
+  { id:'at068', name:'American basswood', sci:'Tilia americana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium', season:'June - July', timing:'Spring or Fall', height:'70 - 100ft', notes:'northern forest, upland mesic, north and east slope aspects, areas of cool air drainage. fragrant flowers; important pollen source for honey bees; Wood used for lumber, veneer, and baskets; buds and fruits eaten by ruffed grouse, quails, squirrels, a' },
+  { id:'ap146', name:'wakerobin', sci:'Trillium erectum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 1.5ft', notes:'moist woods. flowers ill-scented; FACU-' },
+  { id:'ap147', name:'white trillium', sci:'Trillium grandiflorum', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'moist woods. showy flowers; common, often in large colonies' },
+  { id:'ap148', name:'toadshade', sci:'Trillium sessile', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'April - May', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'moist woods & floodplains. UPL' },
+  { id:'ap149', name:'painted trillium', sci:'Trillium undulatum', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'1 - 1.5ft', notes:'frequent in moist woods. FACU' },
+  { id:'ag044', name:'gama grass', sci:'Tripsacum dactyloides', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'June - October', timing:'Spring or Fall', height:'6 - 10ft', notes:'swales, moist fields, borders of woods, shores. excellent forage grass; often grows wild near corn fields; can hybridize with corn; FAC wetland plant' },
+  { id:'at069', name:'eastern hemlock', sci:'Tsuga canadensis', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'75 - 100ft', notes:'cool, moist valleys. susceptible to wooly adelgid and red spider mite; also T. caroliniana for VA; used as ornamental, as specimen trees or sheared/ used as hedge; bark excellent for tanning; deer browse twigs; red squirrel, a few song birds use seed' },
+  { id:'at070', name:'American elm', sci:'Ulmus americana', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium–High', season:'March - April', timing:'Spring or Fall', height:'75 - 100ft', notes:'river bottoms, swamps, disturbed fields, road sides, cutover forests. Dutch elm disease caused decline; distinctive "vase" shape; favorite nesting site of Baltimore oriole; Wood used for pulpwood, charcoal and lumber; formerly much planted as an orna' },
+  { id:'at071', name:'slippery elm', sci:'Ulmus rubra', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'March - May', timing:'Spring or Fall', height:'70 - 70ft', notes:'sea level to 2000 ft; mesic to moist soils of slopes and bottomlands, and drier sites on calcareous soils. Wood used for flooring, finishing work, mine timbers, railroad ties, pulpwood and charcoal; valuable,, quick growing timber tree; also used as ' },
+  { id:'ap150', name:'large-flowered bellwort', sci:'Uvularia grandiflora', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Shade', water:'Medium', season:'April - June', timing:'Spring or Fall', height:'2.5 - 2.5ft', notes:'moist woods. rhizome can be cooked and eaten; young shoots can be substituted for asparagus' },
+  { id:'ap151', name:'perfoliate bellwort', sci:'Uvularia perfoliata', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'April - July', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'moist woods. rhizome can be cooked and eaten; young shoots maybe substituted for asparagus; FACU' },
+  { id:'ap152', name:'straw lily', sci:'Uvularia sessilifolia', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'May - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'dry to moist woodland. rhizomes may be cooked and eaten; young shoots may be substituted for asparagus' },
+  { id:'as041', name:'cranberry', sci:'Vaccinium macrocarpon', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'High', season:'June - July', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'sphagnum bogs, cool wet swampy ground. low mat form, can spread indefinitely; edible cranberries; very rare (S2) in VA. Fall color: dark green to purple to red' },
+  { id:'as042', name:'early lowbush blueberry', sci:'Vaccinium pallidum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - May', timing:'Spring or Fall', height:'1.5 - 2ft', notes:'dry woods and barrens. sweet berries; Berries sweet, of excellent flavor, and much used for pies, muffins; furnish browse for deer; the fruits are eaten by ruffed grouse, wild turkey, black bear, squirrels, raccoon, foxes, other mammals and many spec' },
+  { id:'as043', name:'deerberry', sci:'Vaccinium stamineum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'6 - 12ft', notes:'dry woods, openings, barrens; dry upland oak woods, floodplain forests, clearings and thickets, pine woods and barrens, rock outcroppings. berries edible but sour; Stewed and sweetened fruits are said to be good when served cold; ruffed grouse, bobwh' },
+  { id:'ap153', name:'green false hellebore', sci:'Veratrum viride', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'May - July', timing:'Spring or Fall', height:'2 - 5ft', notes:'swamps & wet woods. leaf edges will brown if soil dries and plant is in windy area; does best in cooler temps; slugs like the foliage; root & foliage are poisonous (Stills)' },
+  { id:'ap154', name:'blue vervain', sci:'Verbena hastata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'June - October', timing:'Spring or Fall', height:'1.5 - 5ft', notes:'moist meadows, swamps floodplains, wet ditches, roadsides. bright flowers; herbal uses; FACW' },
+  { id:'ap155', name:'wingstem', sci:'Verbesina alternifolia', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Medium', season:'August - October', timing:'Spring or Fall', height:'3.5 - 8ft', notes:'moist wooded slopes and open woodlands, riverbanks, shaded lowlands, roadsides, fields. threatened in NY; FAC' },
+  { id:'ap156', name:'New York ironweed', sci:'Vernonia noveboracensis', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'August - October', timing:'Spring or Fall', height:'3.5 - 8ft', notes:'stream banks, wet fields, fresh water marshes. brilliant flowers; tall upright form adds structure to garden; spreads; May become a bad weed in moist or rich pastures' },
+  { id:'ap157', name:'Culver\'s root', sci:'Veronicastrum virginicum', emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'June - September', timing:'Spring or Fall', height:'3 - 6.5ft', notes:'rich woods, moist meadows, thickets, swamps,' },
+  { id:'as044', name:'southern arrowwood', sci:'Viburnum dentatum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'10 - 15ft', notes:'swamps and wet woods, bogs, floodplain forests, stream banks; low, wet acid-sand habitats. stems very straight, nice structure in winter. Fall color: reddish-purple' },
+  { id:'as045', name:'naked witherod', sci:'Viburnum nudum', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'June - July', timing:'Spring or Fall', height:'6.5 - 20ft', notes:'wet woods, swamps, margins of vernal ponds, heath bogs, deep rich upland forests, creek bottoms, wet sandy woods. edible fruit but very acidic; shallow fibrous roots, transplants well; Flesh of fruit bitter; much browsed by deer. Fall color: red to p' },
+  { id:'as046', name:'witherod', sci:'Viburnum nudum var. cassinoides', emoji:'🌱', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May - June', timing:'Spring or Fall', height:'6 - 12ft', notes:'swamps, bogs, moist woods, and barrens. handsome stature; multiple fruit colors at once. Fall color: orange-red to purple' },
+  { id:'at072', name:'black haw', sci:'Viburnum prunifolium', emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'April - May', timing:'Spring or Fall', height:'12 - 24ft', notes:'successional woods, thickets, old fields, and roadsides. fruits edible, used for preserves; Fruits edible to humans; fruits eaten by foxes, bobwhites and several songbirds. Fall color: reddish purple' },
+  { id:'ap158', name:'American dog violet', sci:'Viola conspersa', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Medium–High', season:'April - July', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'moist woods, damp fields, swamps. delicate plant and flower; edible; FACW' },
+  { id:'ap159', name:'marsh blue violet', sci:'Viola cucullata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'April - July', timing:'Spring or Fall', height:'- 0.5ft', notes:'bogs, meadows, & swamps. stemless; self-sows; can become a nuisance; FACW' },
+  { id:'ap160', name:'halberdleaf yellow violet', sci:'Viola hastata', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'April - May', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'rich dry deciduous woods. primarily at higher elevations; UPL' },
+  { id:'ap161', name:'bird\'s foot violet', sci:'Viola pedata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'March - June', timing:'Spring or Fall', height:'- 0.5ft', notes:'sandy or rocky barrens, dry forested slopes. stemless' },
+  { id:'ap162', name:'yellow violet', sci:'Viola pubescens var. pubescens', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium', season:'May - June', timing:'Spring or Fall', height:'0.5 - 1.5ft', notes:'moist or dry deciduous woods, swamps' },
+  { id:'ap163', name:'striped cream violet', sci:'Viola striata', emoji:'💜', type:'native', category:'Perennial',
+    sun:'Part Sun', water:'Medium–High', season:'April - June', timing:'Spring or Fall', height:'0.5 - 1ft', notes:'alluvial woods, alkaline swamps, moist fields. FACW' },
+  { id:'av010', name:'Atlantic wisteria', sci:'Wisteria frutescens', emoji:'🌿', type:'native', category:'Vine',
+    sun:'Full/Part Sun', water:'Medium–High', season:'April - August', timing:'Spring or Fall', height:'20 - 20ft', notes:'borders of wooded swamps and wet woodlands, stream banks, moist or wet thickets. PA: collections probably represent introductions (?)' },
+  { id:'af017', name:'netted chain fern', sci:'Woodwardia areolata', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'0.5 - 2ft', notes:'mostly acid bogs, swamps, or wet woods. spreads by creeping rhizome' },
+  { id:'af018', name:'Virginia chain fern', sci:'Woodwardia virginica', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium–High', timing:'Spring or Fall', height:'3 - 6ft', notes:'swampy places, wet woods. spreads by creeping rhizome' },
+  { id:'ap164', name:'Adam\'s needle', sci:'Yucca filamentosa', emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'June - September', timing:'Spring or Fall', height:'2 - 2.5ft', notes:'coastal sand dunes; outcroppings on thin rocky soils. flower stalk can rise 5-15 feet above foliage' },
+  { id:'ag045', name:'wild rice', sci:'Zizania aquatica', emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'High', season:'June - September', timing:'Spring or Fall', height:'6 - 10ft', notes:'fresh tidal and nontidal marshes, stream borders, shallow waters. annual; edible; Grain used as food by Indians and still a specialty item; important food for overwintering waterfowl; common in tributaries of the Chesapeake Bay' },
+  { id:'ap165', name:'golden-alexanders', sci:'Zizia aurea', emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part/Shade', water:'Low–Medium', season:'April - June', timing:'Spring or Fall', height:'1 - 2.5ft', notes:'wooded bottomland, stream banks, moist meadows, floodplain. FAC' },
+  { id:'af019', name:'northern maidenhair fern', sci:'Adiantum pedatum', emoji:'🌿', type:'native', category:'Fern',
+    sun:'Shade/Part Sun', water:'Medium', timing:'Spring or Fall', height:'1 - 2ft', notes:'rich, moist woods; rocky well-shaded habitats, protected from dryness or direct sunlight. grows in clumps; delicate texture; herbal uses' },
+
 ];
 
 const DEFAULTS = {
@@ -4766,6 +5492,8 @@ async function openPlantDetail(id) {
   document.getElementById('plant-detail-sci').textContent  = p.sci || '';
   document.getElementById('plant-detail-hero-emoji').textContent = p.emoji || '🌱';
   document.getElementById('plant-detail-img').style.display = 'none';
+  document.getElementById('plant-detail-hero-emoji').style.opacity = '1';
+  document.getElementById('plant-detail-wiki').style.display = '';  // reset visibility
 
   const sm = STATUS_META[p.status] || STATUS_META.planned;
   document.getElementById('plant-detail-status-badge').innerHTML = `<span class="badge ${sm.cls}">${sm.icon} ${sm.label}</span>`;
@@ -4780,16 +5508,37 @@ async function openPlantDetail(id) {
     p.zone   ? `<span class="badge badge-gray">📍 ${p.zone}</span>` : '',
   ].filter(Boolean).join('');
 
-  // Care guide
+  // Care guide — check CARE_GUIDE first, then fall back to catalog lookup, then notes
   const care = CARE_GUIDE[p.id];
-  const caredHTML = care ? `
+  let caredHTML = '';
+  if (care) {
+    caredHTML = `
     <div class="plant-care-section">
       <div class="plant-care-title">Care Guide</div>
       <div class="plant-care-row"><span class="plant-care-icon">💧</span><span class="plant-care-label">Watering</span><span class="plant-care-value">${care.watering}</span></div>
       <div class="plant-care-row"><span class="plant-care-icon">✂️</span><span class="plant-care-label">Maintenance</span><span class="plant-care-value">${care.care}</span></div>
       <div class="plant-care-row"><span class="plant-care-icon">⚠️</span><span class="plant-care-label">Watch for</span><span class="plant-care-value">${care.issues}</span></div>
       <div class="plant-care-row"><span class="plant-care-icon">📍</span><span class="plant-care-label">DC tip</span><span class="plant-care-value">${care.dcTip}</span></div>
-    </div>` : (p.notes ? `<div class="plant-care-section"><div class="plant-care-title">Notes</div><p style="font-size:13px;color:var(--text-2)">${p.notes}</p></div>` : '');
+    </div>`;
+  } else {
+    // Look up the plant in PLANT_CATALOG to build care info from structured fields
+    const catEntry = PLANT_CATALOG.find(c => c.sci && p.sci && c.sci.toLowerCase() === p.sci.toLowerCase());
+    const notesText = p.notes || (catEntry && catEntry.notes) || '';
+    const sunText   = catEntry ? catEntry.sun   : p.sun;
+    const waterText = catEntry ? catEntry.water : p.water;
+    const heightText = catEntry ? catEntry.height : p.height;
+    if (notesText || sunText || waterText) {
+      caredHTML = `<div class="plant-care-section">
+        <div class="plant-care-title">Care & Cultivation</div>
+        ${waterText ? `<div class="plant-care-row"><span class="plant-care-icon">💧</span><span class="plant-care-label">Water needs</span><span class="plant-care-value">${waterText}</span></div>` : ''}
+        ${sunText   ? `<div class="plant-care-row"><span class="plant-care-icon">☀️</span><span class="plant-care-label">Light</span><span class="plant-care-value">${sunText}</span></div>` : ''}
+        ${heightText ? `<div class="plant-care-row"><span class="plant-care-icon">📏</span><span class="plant-care-label">Mature size</span><span class="plant-care-value">${heightText}</span></div>` : ''}
+        ${catEntry && catEntry.wildlife ? `<div class="plant-care-row"><span class="plant-care-icon">🦋</span><span class="plant-care-label">Wildlife</span><span class="plant-care-value">${catEntry.wildlife}</span></div>` : ''}
+        ${catEntry && catEntry.timing   ? `<div class="plant-care-row"><span class="plant-care-icon">📅</span><span class="plant-care-label">Best planted</span><span class="plant-care-value">${catEntry.timing} in DC Zone 7a</span></div>` : ''}
+        ${notesText ? `<div class="plant-care-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span class="plant-care-icon" style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px">Notes</span><span class="plant-care-value" style="font-size:13px;color:var(--text-2);line-height:1.55">${notesText}</span></div>` : ''}
+      </div>`;
+    }
+  }
   document.getElementById('plant-detail-care').innerHTML = caredHTML;
 
   // Companion planting
@@ -4808,36 +5557,42 @@ async function openPlantDetail(id) {
   harvestBtn.style.display = canHarvest ? 'inline-flex' : 'none';
   harvestBtn.onclick = () => { closeModal('plant-detail'); openLogHarvest(id); };
 
-  // Show modal immediately with what we have
-  document.getElementById('plant-detail-wiki').innerHTML = '<span style="color:var(--text-3)">Loading description…</span>';
-  openModal('plant-detail');
-
   // Fetch Wikipedia summary (async, non-blocking)
   if (p.wiki || p.sci) {
+    const wikiEl = document.getElementById('plant-detail-wiki');
+    wikiEl.style.display = '';
+    wikiEl.innerHTML = '<span style="color:var(--text-3);font-size:12px">Loading description…</span>';
+    openModal('plant-detail');
     const wikiKey = p.wiki || (p.sci||'').replace(/ /g,'_');
     if (_wikiCache[wikiKey]) {
       applyWikiData(_wikiCache[wikiKey]);
     } else {
       try {
-        const data = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${wikiKey}`)
+        const data = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiKey)}`)
           .then(r => r.json());
         _wikiCache[wikiKey] = data;
         applyWikiData(data);
       } catch {
-        document.getElementById('plant-detail-wiki').innerHTML =
-          p.notes ? p.notes : '<span style="color:var(--text-3)">Description unavailable offline — connect to internet for Wikipedia info.</span>';
+        wikiEl.innerHTML = '<span style="color:var(--text-3);font-size:12px">Description unavailable offline.</span>';
       }
     }
   } else {
-    document.getElementById('plant-detail-wiki').textContent = p.notes || '';
+    // No sci name — hide the wiki section entirely (care section has all the info)
+    document.getElementById('plant-detail-wiki').style.display = 'none';
+    openModal('plant-detail');
   }
 }
 
 function applyWikiData(data) {
   // Description
   const extract = data.extract_html || data.extract || '';
-  const short = extract.split('. ').slice(0,3).join('. ').replace(/<[^>]+>/g,'');
-  document.getElementById('plant-detail-wiki').textContent = short + (short.endsWith('.') ? '' : '.');
+  const short = extract.split('. ').slice(0,3).join('. ').replace(/<[^>]+>/g,'').trim();
+  const wikiEl = document.getElementById('plant-detail-wiki');
+  if (short) {
+    wikiEl.textContent = short + (short.endsWith('.') ? '' : '.');
+  } else {
+    wikiEl.style.display = 'none';
+  }
 
   // Image
   if (data.thumbnail?.source) {
@@ -4856,7 +5611,7 @@ async function loadCardImage(plantId, wikiKey) {
   if (!wikiKey) return;
   try {
     if (!_wikiCache[wikiKey]) {
-      const data = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${wikiKey}`).then(r=>r.json());
+      const data = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiKey)}`).then(r=>r.json());
       _wikiCache[wikiKey] = data;
     }
     const data = _wikiCache[wikiKey];
