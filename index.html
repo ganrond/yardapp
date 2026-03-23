@@ -2532,7 +2532,7 @@ function updateHintBanner() {
   if (_mapTool === 'zone' || _mapTool === 'sun') {
     hint.style.display = 'block';
     hint.textContent = _currentPoints.length
-      ? `${_currentPoints.length} point${_currentPoints.length>1?'s':''} — double-click to finish`
+      ? `${_currentPoints.length} point${_currentPoints.length>1?'s':''} — double-tap to finish`
       : _mapTool === 'zone' ? 'Click to start drawing a zone' : 'Click to start drawing sun area';
   } else {
     hint.style.display = 'none';
@@ -2602,9 +2602,19 @@ function onCanvasMove(e) {
   _ctx.setLineDash([]);
 }
 
+let _lastTapTime = 0;
 function onCanvasTouch(e) {
   e.preventDefault();
-  onCanvasClick(e);
+  const now = Date.now();
+  const timeSinceLast = now - _lastTapTime;
+  _lastTapTime = now;
+  if (timeSinceLast < 300) {
+    // Double-tap — finish the shape (same as dblclick)
+    onCanvasDblClick(e);
+  } else {
+    // Single tap — add a point
+    onCanvasClick(e);
+  }
 }
 
 function drawPreviewPoints() {
