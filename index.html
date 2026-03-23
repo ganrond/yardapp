@@ -60,6 +60,22 @@
     .header-sub   { font-size: 12px; color: var(--g-pale); margin-top: 1px; }
     .header-date  { text-align: right; font-size: 13px; color: var(--g-pale); }
     .header-date strong { display: block; font-size: 20px; font-weight: 700; color: var(--white); }
+    .sync-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--g-pale);
+      cursor: pointer; padding: 5px 8px; border-radius: 8px;
+      border: none; background: none; transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .sync-badge:hover { background: rgba(255,255,255,0.1); }
+    .sync-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      background: var(--g-pale); transition: background 0.3s;
+    }
+    .sync-dot.ok      { background: #5cb85c; }
+    .sync-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
+    .sync-dot.error   { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
     /* ── NAV ── */
     nav {
@@ -772,9 +788,15 @@
       <div class="header-sub">Washington DC · Zone 7a</div>
     </div>
   </div>
-  <div class="header-date">
-    <strong id="hdr-weekday"></strong>
-    <span id="hdr-date"></span>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+    <div class="header-date">
+      <strong id="hdr-weekday"></strong>
+      <span id="hdr-date"></span>
+    </div>
+    <button class="sync-badge" id="sync-badge" onclick="manualSync()" title="Tap to sync with cloud">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">Sync</span>
+    </button>
   </div>
 </header>
 
@@ -2005,24 +2027,40 @@ function migrateDB() {
   if (!db.calendarTasks) db.calendarTasks = DEFAULTS.calendarTasks;
 }
 
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot || !lbl) return;
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = label;
+}
+
+async function fetchFromSupabase() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${SB_TABLE}?key=eq.${SB_ROW}&select=data`,
+    { headers: SB_HEADERS }
+  );
+  if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+  const rows = await res.json();
+  return rows.length ? rows[0].data : null;
+}
+
 async function loadDB() {
   // 1. Try Supabase (cloud — most up-to-date across devices)
   if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    setSyncStatus('syncing', 'Loading…');
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/${SB_TABLE}?key=eq.${SB_ROW}&select=data`,
-        { headers: SB_HEADERS }
-      );
-      if (res.ok) {
-        const rows = await res.json();
-        if (rows.length > 0 && rows[0].data) {
-          db = rows[0].data;
-          migrateDB();
-          localStorage.setItem(DB_KEY, JSON.stringify(db)); // cache locally
-          return;
-        }
+      const cloudData = await fetchFromSupabase();
+      if (cloudData) {
+        db = cloudData;
+        migrateDB();
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        setSyncStatus('ok', 'Synced');
+        return;
       }
-    } catch { /* offline — fall through */ }
+    } catch {
+      setSyncStatus('error', 'Offline');
+    }
   }
 
   // 2. Fall back to localStorage (works offline)
@@ -2041,14 +2079,74 @@ function saveDB() {
 }
 
 async function syncToSupabase() {
+  setSyncStatus('syncing', 'Saving…');
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, {
       method:  'POST',
       headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
       body:    JSON.stringify({ key: SB_ROW, data: db, updated_at: new Date().toISOString() }),
     });
-  } catch { /* offline — data is safe in localStorage, will sync next time */ }
+    if (res.ok) {
+      setSyncStatus('ok', 'Saved ✓');
+    } else {
+      setSyncStatus('error', 'Sync error');
+      console.warn('Supabase sync failed:', res.status, await res.text());
+    }
+  } catch {
+    setSyncStatus('error', 'Offline');
+  }
 }
+
+// Pull latest from cloud and refresh the current view (used by manual sync + visibility change)
+async function pullFromCloud() {
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
+  setSyncStatus('syncing', 'Refreshing…');
+  try {
+    const cloudData = await fetchFromSupabase();
+    if (cloudData) {
+      db = cloudData;
+      migrateDB();
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+      setSyncStatus('ok', 'Up to date ✓');
+      // Re-render the active tab so the page reflects fresh data
+      const activeTab = document.querySelector('.tab-content.active');
+      if (activeTab) renderTab(activeTab.id.replace('tab-',''));
+      renderDashboard();
+    } else {
+      setSyncStatus('ok', 'No cloud data');
+    }
+  } catch {
+    setSyncStatus('error', 'Offline');
+  }
+}
+
+async function manualSync() {
+  // Push local → cloud, then pull cloud → local
+  setSyncStatus('syncing', 'Syncing…');
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`, {
+      method:  'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
+      body:    JSON.stringify({ key: SB_ROW, data: db, updated_at: new Date().toISOString() }),
+    });
+    if (res.ok) {
+      setSyncStatus('ok', 'Synced ✓');
+      showToast('✅ Data synced to cloud');
+    } else {
+      setSyncStatus('error', 'Sync failed');
+      showToast('⚠️ Sync failed — check your connection');
+    }
+  } catch {
+    setSyncStatus('error', 'Offline');
+    showToast('⚠️ No internet connection');
+  }
+}
+
+// Re-fetch from cloud whenever the user returns to this tab/window
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') pullFromCloud();
+});
+window.addEventListener('focus', pullFromCloud);
 
 // ═══════════════════════════════════════════════════
 // HELPERS
