@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="32" fill="#1e4d34"/>
+  <circle cx="96" cy="96" r="72" fill="#2d6a4f"/>
+  <!-- stem -->
+  <line x1="96" y1="152" x2="96" y2="76" stroke="#b7e4c7" stroke-width="7" stroke-linecap="round"/>
+  <!-- left leaf -->
+  <path d="M96 118 C80 108 52 98 46 72 C68 62 94 78 96 112 Z" fill="#52b788"/>
+  <!-- right leaf -->
+  <path d="M96 100 C112 90 140 80 146 54 C124 44 98 60 96 94 Z" fill="#b7e4c7"/>
+  <!-- flower center -->
+  <circle cx="96" cy="72" r="10" fill="#b7e4c7" opacity="0.9"/>
+  <circle cx="96" cy="72" r="5" fill="#1e4d34"/>
+</svg>
