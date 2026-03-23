@@ -545,6 +545,68 @@
     .sun-toggle.active-shade{ background:#e3f2fd; border-color:#1e88e5; color:#1565c0; }
     .legend-item { display:flex; align-items:center; gap:7px; font-size:11px; padding:3px 0; }
 
+    /* ── PLANT BAND — new types ── */
+    .plant-band-tree  { background: linear-gradient(135deg, #a5d6a7, #e8f5e9); }
+    .plant-band-shrub { background: linear-gradient(135deg, #c8e6c9, #dcedc8); }
+    .plant-band-grass { background: linear-gradient(135deg, #f0f4c3, #f9fbe7); }
+    .plant-band-vine  { background: linear-gradient(135deg, #b2dfdb, #e0f2f1); }
+
+    /* ── CATALOG PICKER ── */
+    #catalog-search {
+      width: 100%; padding: 9px 14px; border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 13px; font-family: 'DM Sans', sans-serif;
+      background: var(--cream); color: var(--text-1); margin-bottom: 12px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    #catalog-search:focus { outline: none; border-color: var(--g-light); box-shadow: 0 0 0 3px rgba(82,183,136,0.15); }
+
+    .catalog-tabs {
+      display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .catalog-tab {
+      padding: 5px 12px; border-radius: 99px; border: 1.5px solid var(--border);
+      background: none; font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: all 0.15s; color: var(--text-2); font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
+    .catalog-tab:hover  { border-color: var(--g-light); color: var(--g-mid); }
+    .catalog-tab.active { background: var(--g-mid); color: #fff; border-color: var(--g-mid); }
+
+    .catalog-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+      max-height: 320px; overflow-y: auto; padding-right: 2px;
+    }
+    .catalog-grid::-webkit-scrollbar { width: 4px; }
+    .catalog-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .catalog-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 11px; border-radius: 10px; border: 1.5px solid transparent;
+      background: var(--cream); cursor: pointer; text-align: left;
+      transition: all 0.15s; width: 100%;
+    }
+    .catalog-item:hover { background: var(--g-bg); border-color: var(--g-pale); }
+    .catalog-item-owned { opacity: 0.55; }
+    .catalog-emoji { font-size: 22px; flex-shrink: 0; }
+    .catalog-item-name { font-size: 12px; font-weight: 600; color: var(--text-1); line-height: 1.3; }
+    .catalog-item-sci  { font-size: 10px; color: var(--text-3); font-style: italic; }
+    .catalog-item-cat  { font-size: 10px; font-weight: 700; color: var(--g-mid); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+    .catalog-item-owned .catalog-item-cat::after { content: ' · ✓ In garden'; color: var(--g-mid); }
+
+    .catalog-dup-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--amber-bg); border: 1.5px solid var(--amber); border-radius: var(--radius-sm);
+      padding: 10px 14px; font-size: 13px; color: var(--amber); margin-bottom: 14px;
+    }
+
+    .catalog-back-btn {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 12px;
+      color: var(--text-3); background: none; border: none; cursor: pointer;
+      padding: 0; margin-bottom: 14px; font-family: 'DM Sans', sans-serif;
+      transition: color 0.15s;
+    }
+    .catalog-back-btn:hover { color: var(--g-mid); }
+
     /* ── PLANT CARD IMAGES ── */
     .plant-band { position:relative; overflow:hidden; }
     .plant-card-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.4s; }
@@ -1901,93 +1963,129 @@
 
 <!-- MODAL: PLANT ADD/EDIT -->
 <div class="modal-overlay" id="modal-plant">
-  <div class="modal-box" style="max-width:520px">
+  <div class="modal-box" style="max-width:560px">
     <h3 id="plant-modal-title">Add Plant</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
-      <div class="form-group" style="grid-column:span 2">
-        <label>Plant name *</label>
-        <input type="text" id="plant-name" placeholder="e.g. Black-Eyed Susan" />
+
+    <!-- ── CATALOG VIEW ── -->
+    <div id="plant-catalog-view">
+      <input type="text" id="catalog-search" placeholder="🔍  Search 75+ native plants, trees, shrubs, veggies…" oninput="filterCatalog()" />
+      <div class="catalog-tabs">
+        <button class="catalog-tab active" data-cat="all"       onclick="setCatalogTab(this)">All</button>
+        <button class="catalog-tab"        data-cat="Tree"      onclick="setCatalogTab(this)">🌳 Trees</button>
+        <button class="catalog-tab"        data-cat="Shrub"     onclick="setCatalogTab(this)">🌿 Shrubs</button>
+        <button class="catalog-tab"        data-cat="Perennial" onclick="setCatalogTab(this)">🌸 Perennials</button>
+        <button class="catalog-tab"        data-cat="Grass"     onclick="setCatalogTab(this)">🌾 Grasses</button>
+        <button class="catalog-tab"        data-cat="Vine"      onclick="setCatalogTab(this)">🌺 Vines</button>
+        <button class="catalog-tab"        data-cat="Vegetable" onclick="setCatalogTab(this)">🥬 Veggies</button>
+        <button class="catalog-tab"        data-cat="Herb"      onclick="setCatalogTab(this)">🌿 Herbs</button>
       </div>
-      <div class="form-group">
-        <label>Scientific name</label>
-        <input type="text" id="plant-sci" placeholder="e.g. Rudbeckia hirta" />
+      <div class="catalog-grid" id="catalog-grid"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+        <span style="font-size:12px;color:var(--text-3)">Don't see your plant?</span>
+        <button class="btn btn-ghost btn-sm" onclick="showPlantForm(null)">+ Add Custom</button>
       </div>
-      <div class="form-group">
-        <label>Emoji</label>
-        <input type="text" id="plant-emoji" placeholder="e.g. 🌼" maxlength="4" />
-      </div>
-      <div class="form-group">
-        <label>Type</label>
-        <select id="plant-type">
-          <option value="native">🌸 Native Plant</option>
-          <option value="vegetable">🥬 Vegetable</option>
-          <option value="herb">🌿 Herb</option>
-          <option value="lawn">🌾 Lawn</option>
-          <option value="other">📦 Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Sun requirement</label>
-        <select id="plant-sun">
-          <option>Full Sun</option>
-          <option>Full/Part Sun</option>
-          <option>Part Sun</option>
-          <option>Shade/Part Sun</option>
-          <option>Shade</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Bloom / harvest season</label>
-        <input type="text" id="plant-season" placeholder="e.g. Jul–Oct or 60–80 days" />
-      </div>
-      <div class="form-group">
-        <label>When to plant in DC</label>
-        <input type="text" id="plant-timing" placeholder="e.g. Spring / After Apr 15" />
-      </div>
-      <div class="form-group">
-        <label>Water needs</label>
-        <select id="plant-water">
-          <option value="Low">Low</option>
-          <option value="Medium" selected>Medium</option>
-          <option value="High">High</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="plant-status">
-          <option value="planned">📋 Planned</option>
-          <option value="planted">🌱 Planted</option>
-          <option value="established">✅ Established</option>
-          <option value="harvested">🌾 Harvested</option>
-          <option value="removed">❌ Removed</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Planting date</label>
-        <input type="date" id="plant-date" />
-      </div>
-      <div class="form-group">
-        <label>Zone / Location</label>
-        <select id="plant-zone">
-          <option value="">— Not placed yet —</option>
-          <option>Front Yard</option>
-          <option>Back Yard</option>
-          <option>Raised Veggie Bed</option>
-          <option>Native Plant Bed (Front)</option>
-          <option>Native Plant Bed (Back)</option>
-          <option>Container</option>
-        </select>
-      </div>
-      <div class="form-group" style="grid-column:span 2">
-        <label>Notes</label>
-        <textarea id="plant-notes" rows="3" placeholder="Care tips, observations, what's working..."></textarea>
+      <div class="modal-footer" style="border-top:none;padding-top:0;margin-top:4px">
+        <button class="btn btn-ghost" onclick="closeModal('plant')">Cancel</button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" id="plant-delete-btn" onclick="deletePlant()" style="display:none;margin-right:auto">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('plant')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePlant()">Save Plant</button>
+
+    <!-- ── FORM VIEW ── -->
+    <div id="plant-form-view" style="display:none">
+      <button class="catalog-back-btn" id="plant-back-btn" onclick="showCatalogView()">← Back to catalog</button>
+      <div id="plant-dup-banner" class="catalog-dup-banner" style="display:none">
+        ⚠️ <div><strong id="plant-dup-msg"></strong><br><span style="font-size:12px;font-weight:400">You can still add it — maybe a different location or date.</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
+        <div class="form-group" style="grid-column:span 2">
+          <label>Plant name *</label>
+          <input type="text" id="plant-name" placeholder="e.g. Black-Eyed Susan" oninput="checkPlantDuplicate()" />
+        </div>
+        <div class="form-group">
+          <label>Scientific name</label>
+          <input type="text" id="plant-sci" placeholder="e.g. Rudbeckia hirta" />
+        </div>
+        <div class="form-group">
+          <label>Emoji</label>
+          <input type="text" id="plant-emoji" placeholder="e.g. 🌼" maxlength="4" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="plant-type">
+            <option value="native">🌸 Native Perennial</option>
+            <option value="tree">🌳 Tree</option>
+            <option value="shrub">🌿 Shrub</option>
+            <option value="grass">🌾 Ornamental Grass</option>
+            <option value="vine">🌺 Vine / Climber</option>
+            <option value="vegetable">🥬 Vegetable</option>
+            <option value="herb">🌿 Herb</option>
+            <option value="lawn">🌾 Lawn Grass</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sun requirement</label>
+          <select id="plant-sun">
+            <option>Full Sun</option>
+            <option>Full/Part Sun</option>
+            <option>Part Sun</option>
+            <option>Shade/Part Sun</option>
+            <option>Shade</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bloom / harvest season</label>
+          <input type="text" id="plant-season" placeholder="e.g. Jul–Oct or 60–80 days" />
+        </div>
+        <div class="form-group">
+          <label>When to plant in DC</label>
+          <input type="text" id="plant-timing" placeholder="e.g. Spring / After Apr 15" />
+        </div>
+        <div class="form-group">
+          <label>Water needs</label>
+          <select id="plant-water">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="plant-status">
+            <option value="planted">🌱 Planted</option>
+            <option value="planned">📋 Planned</option>
+            <option value="established">✅ Established</option>
+            <option value="harvested">🌾 Harvested</option>
+            <option value="removed">❌ Removed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Planting date</label>
+          <input type="date" id="plant-date" />
+        </div>
+        <div class="form-group">
+          <label>Zone / Location</label>
+          <select id="plant-zone">
+            <option value="">— Not placed yet —</option>
+            <option>Front Yard</option>
+            <option>Back Yard</option>
+            <option>Raised Veggie Bed</option>
+            <option>Native Plant Bed (Front)</option>
+            <option>Native Plant Bed (Back)</option>
+            <option>Container</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:span 2">
+          <label>Notes</label>
+          <textarea id="plant-notes" rows="3" placeholder="Care tips, observations, what's working..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger btn-sm" id="plant-delete-btn" onclick="deletePlant()" style="display:none;margin-right:auto">Delete</button>
+        <button class="btn btn-ghost" onclick="closeModal('plant')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePlant()">Save Plant</button>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -2359,6 +2457,322 @@
 // ═══════════════════════════════════════════════════
 // DATA DEFAULTS
 // ═══════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════
+// PLANT CATALOG — reference library (not stored in db)
+// Sources: DC Plant Lists (Richmond/DC Zone 7a), Alliance for the Chesapeake Bay
+// ═══════════════════════════════════════════════════
+const PLANT_CATALOG = [
+  // ── TREES ────────────────────────────────────────────────────────────
+  { id:'ct01', name:'American Holly',           sci:'Ilex opaca',                  emoji:'🌲', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium', season:'May–Jun bloom; berries Sep–Feb', timing:'Spring or Fall',
+    height:'20–40 ft', wildlife:'Song birds, bees',
+    notes:'Evergreen with bold red berries that persist all winter. Needs male + female plant to fruit. pH 4–7.5. Excellent bird habitat.' },
+  { id:'ct02', name:'Black Gum',                sci:'Nyssa sylvatica',             emoji:'🌳', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Apr–Jun bloom; berries Sep–Oct', timing:'Spring or Fall',
+    height:'50–75 ft', wildlife:'Song birds, waterfowl, small mammals, bees',
+    notes:'Stunning scarlet fall color. Blue-black berries loved by birds. Tolerates wet to dry soil. pH 4.5–6.' },
+  { id:'ct03', name:'Eastern Hop-Hornbeam',     sci:'Ostrya virginiana',           emoji:'🌳', type:'native', category:'Tree',
+    sun:'Shade/Part Sun', water:'Medium', season:'May bloom', timing:'Spring or Fall',
+    height:'25–50 ft', wildlife:'Song birds, small mammals',
+    notes:'Underused understory gem. Yellow fall color. Interesting hop-like fruiting clusters. Very adaptable to soil pH 4.2–7.6.' },
+  { id:'ct04', name:'Eastern Redbud',           sci:'Cercis canadensis',           emoji:'🌸', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Apr–May bloom (pink-purple)', timing:'Spring or Fall',
+    height:'20–30 ft', wildlife:'Butterflies, song birds, small mammals, bees',
+    notes:"One of DC's best spring trees — blooms on bare branches before leaves. Tolerates some drought once established. pH 4.5–7.5." },
+  { id:'ct05', name:'Flowering Dogwood',        sci:'Cornus florida',              emoji:'🌸', type:'native', category:'Tree',
+    sun:'Part Sun', water:'Low–Medium', season:'Apr–May bloom white; berries Sep–Dec', timing:'Spring or Fall',
+    height:'10–30 ft', wildlife:'Song birds, waterfowl, small mammals',
+    notes:'Iconic DC native. Prefers dappled shade under taller trees. Brilliant red berries attract migrating birds. pH 5–7.' },
+  { id:'ct06', name:'Red Mulberry',             sci:'Morus rubra',                 emoji:'🍒', type:'native', category:'Tree',
+    sun:'Full/Part Sun', water:'Medium', season:'May–Jun bloom; berries Jun–Jul', timing:'Spring or Fall',
+    height:'30–45 ft', wildlife:'Song birds',
+    notes:'Native mulberry — sweet edible berries that birds absolutely devour. Fast grower. pH 5–7.' },
+  { id:'ct07', name:'Sweet Crabapple',          sci:'Malus coronaria',             emoji:'🌸', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium', season:'Apr–May bloom (pink-white)', timing:'Spring or Fall',
+    height:'10–30 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Fragrant spring blooms. Small tart fruit persists into winter for birds. pH 5.5–6.5.' },
+  { id:'ct08', name:'Sweet Gum',               sci:'Liquidambar styraciflua',     emoji:'🌟', type:'native', category:'Tree',
+    sun:'Full Sun', water:'Medium–High', season:'Apr–May bloom', timing:'Spring or Fall',
+    height:'50–75 ft', wildlife:'Song birds, waterfowl, small mammals',
+    notes:'Spectacular yellow-red fall color. Star-shaped leaves. Spiked seed balls persist for birds through winter. pH 4.5–7.' },
+
+  // ── SHRUBS (MEDIUM–LARGE) ─────────────────────────────────────────────
+  { id:'cs01', name:'Common Elderberry',        sci:'Sambucus canadensis',         emoji:'🫐', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Jun bloom white; berries Aug–Sep', timing:'Spring or Fall',
+    height:'6–12 ft', wildlife:'Song birds, small mammals',
+    notes:'Fast-growing native. Dark purple berries for birds and jam. Extremely adaptable to wet or dry soil. pH 6.1–7.5.' },
+  { id:'cs02', name:'Fragrant Sumac',           sci:'Rhus aromatica',              emoji:'🍂', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low', season:'Mar–May bloom (yellow-green)', timing:'Spring or Fall',
+    height:'5–10 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Aromatic foliage, brilliant red fall color. Drought-tolerant. Great for slopes and erosion control. pH 6.1–8.5.' },
+  { id:'cs03', name:'Highbush Blueberry',       sci:'Vaccinium corymbosum',        emoji:'🫐', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Apr–Jun bloom; berries Jul–Aug', timing:'Spring or Fall',
+    height:'6–12 ft', wildlife:'Butterflies, song birds, waterfowl, small mammals, bees',
+    notes:'Edible berries for you and wildlife. Needs acidic soil pH 4–6.5. Plant 2+ varieties for best cross-pollination.' },
+  { id:'cs04', name:'Mountain Laurel',          sci:'Kalmia latifolia',            emoji:'🌸', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Adaptable', season:'May–Jul bloom (white-pink)', timing:'Spring or Fall',
+    height:'12–20 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Evergreen with spectacular spring blooms. State flower of PA and CT. pH 4.5–6. All parts toxic if ingested.' },
+  { id:'cs05', name:'Red Chokeberry',           sci:'Aronia arbutifolia',          emoji:'🔴', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Mar–May bloom; berries Sep–Dec', timing:'Spring or Fall',
+    height:'2–12 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Brilliant red fall color and persistent red berries through winter. Tolerates wet soil. pH 5.1–6.5.' },
+  { id:'cs06', name:'Shadblow Serviceberry',    sci:'Amelanchier canadensis',      emoji:'🌸', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Apr–May bloom white; berries Jun–Jul', timing:'Spring or Fall',
+    height:'20–50 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'First native to bloom in spring. Sweet edible Juneberries devoured by birds within days. pH 5.6–7.5.' },
+  { id:'cs07', name:'Spicebush',                sci:'Lindera benzoin',             emoji:'🌿', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'Mar–May bloom (yellow)', timing:'Spring or Fall',
+    height:'6–16 ft', wildlife:'Butterflies, song birds, small mammals',
+    notes:'Host plant for Spicebush Swallowtail butterfly. Fragrant leaves. Brilliant yellow fall color. pH 4.5–6.5.' },
+  { id:'cs08', name:'Shining Sumac',            sci:'Rhus copallina',              emoji:'🍁', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low', season:'Jul–Sep bloom; berries Oct–Nov', timing:'Spring or Fall',
+    height:'20–35 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Glossy foliage and brilliant scarlet fall color. Drought-tolerant once established. Spreads by runners. pH 5.3–7.5.' },
+  { id:'cs09', name:'Winterberry Holly',        sci:'Ilex verticillata',           emoji:'🔴', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Jun–Jul bloom; berries Aug–Feb', timing:'Spring or Fall',
+    height:'6–12 ft', wildlife:'Song birds, waterfowl, small mammals, bees',
+    notes:'Fiery red berries blaze all winter — one of the best wildlife plants. Needs male + female. Tolerates wet soil. pH 4.5–6.5.' },
+  { id:'cs10', name:'Witch Hazel',              sci:'Hamamelis virginiana',        emoji:'✨', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'Sep–Dec bloom (fragrant yellow — blooms in fall!)', timing:'Spring or Fall',
+    height:'15–30 ft', wildlife:'Song birds, small mammals',
+    notes:'Blooms in late fall when nothing else does — fragrant yellow ribbon flowers. Excellent fall color. pH 5.5–6.5.' },
+  { id:'cs11', name:'Allegheny Blackberry',     sci:'Rubus allegheniensis',        emoji:'🫐', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May–Jun bloom; berries Jul–Sep', timing:'Spring or Fall',
+    height:'3–9 ft', wildlife:'Butterflies, song birds, small mammals, bees',
+    notes:'Native blackberry with edible fruit for you and wildlife. Thorny. Can spread. pH 4.5–7.5.' },
+  { id:'cs12', name:'Black Chokeberry',         sci:'Aronia melanocarpa',          emoji:'🍒', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Apr–May bloom; berries Sep–Nov', timing:'Spring or Fall',
+    height:'3–6 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Compact, low-maintenance. Superb fall color. Extremely adaptable — wet, dry, sun, shade. pH 5.1–6.5.' },
+  { id:'cs13', name:'Black Huckleberry',        sci:'Gaylussacia baccata',         emoji:'🫐', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Adaptable', season:'May–Jun bloom; berries Jul–Sep', timing:'Spring or Fall',
+    height:'1.5–3 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Low-growing native with edible black berries. Great for woodland edges and slopes. pH 4.5–6.5.' },
+  { id:'cs14', name:'Inkberry Holly',           sci:'Ilex glabra',                 emoji:'🟢', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May–Jun bloom; berries Sep–Mar', timing:'Spring or Fall',
+    height:'6–8 ft', wildlife:'Song birds, waterfowl, small mammals, bees',
+    notes:'Evergreen native holly with black berries that persist through winter. Tolerates wet soil. pH 4.5–6.' },
+  { id:'cs15', name:'Lowbush Blueberry',        sci:'Vaccinium angustifolium',     emoji:'🫐', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'May–Jun bloom; berries Jul–Aug', timing:'Spring or Fall',
+    height:'1–2 ft', wildlife:'Butterflies, song birds, waterfowl, small mammals, bees',
+    notes:'Low ground cover with edible blueberries and brilliant red fall color. Great for slopes. pH 4–6.' },
+  { id:'cs16', name:'Maple-leaved Arrowwood',   sci:'Viburnum acerifolium',        emoji:'🍁', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jun bloom cream-pink; berries Aug–Dec', timing:'Spring or Fall',
+    height:'3–6 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Tolerates deep shade — excellent under trees. Stunning pink-orange-red fall color. pH 5.1–6.' },
+  { id:'cs17', name:'New Jersey Tea',           sci:'Ceanothus americanus',        emoji:'🌸', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low', season:'May–Sep bloom (white)', timing:'Spring or Fall',
+    height:'3–4 ft', wildlife:'Butterflies, song birds, small mammals, bees',
+    notes:'Nitrogen-fixing native shrub. Extremely long bloom season. Drought-tolerant once established. pH 4.3–6.5.' },
+  { id:'cs18', name:'Purple Flowering Raspberry', sci:'Rubus odoratus',            emoji:'🌸', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Medium', season:'Jun–Sep bloom (purple)', timing:'Spring or Fall',
+    height:'3–6 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Shade-tolerant native raspberry with large fragrant purple flowers. Spreads to form colonies.' },
+  { id:'cs19', name:'Sweetfern',                sci:'Comptonia peregrina',         emoji:'🌿', type:'native', category:'Shrub',
+    sun:'Full/Part Sun', water:'Low', season:'Apr–May bloom', timing:'Spring or Fall',
+    height:'3–4 ft', wildlife:'Song birds, small mammals',
+    notes:"Not a true fern — it's a shrub with fern-like fragrant leaves. Excellent for dry, poor soils and slopes. pH 4–7." },
+  { id:'cs20', name:'Wintergreen',              sci:'Gaultheria procumbens',       emoji:'🌿', type:'native', category:'Shrub',
+    sun:'Shade/Part Sun', water:'Low–Medium', season:'May–Aug bloom; red berries Jul–Apr', timing:'Spring or Fall',
+    height:'0.5–1 ft', wildlife:'Song birds, small mammals, bees',
+    notes:'Low-growing ground cover with minty fragrance. Red berries persist through winter. Great for woodland gardens. pH 4–6.5.' },
+
+  // ── ORNAMENTAL GRASSES ────────────────────────────────────────────────
+  { id:'cg01', name:'Autumn Bentgrass',         sci:'Agrostis perennans',          emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Jun–Oct bloom', timing:'Spring',
+    height:'1–3 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Fine-textured native grass for moist woodland edges. pH 5.5–7.5.' },
+  { id:'cg02', name:'Big Bluestem',             sci:'Andropogon gerardii',         emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Jun–Sep bloom; bronze fall color', timing:'Spring',
+    height:'2–6.5 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'The signature prairie grass — turns stunning bronze-copper in fall. Tolerates almost any soil. pH 6–7.5.' },
+  { id:'cg03', name:'Broomsedge',               sci:'Andropogon virginicus',       emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Adaptable', season:'Aug–Nov bloom; golden winter color', timing:'Spring',
+    height:'1–3 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Glowing golden-orange in fall and winter. Pioneer species for disturbed areas. pH 4.9–7.' },
+  { id:'cg04', name:'Giant Plumegrass',         sci:'Saccharum giganteum',         emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Aug–Oct (large silky plumes)', timing:'Spring',
+    height:'3.5–10 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Dramatic grass with spectacular silky white plumes. Loves wet areas along streams. pH 3.5–7.' },
+  { id:'cg05', name:'Little Bluestem',          sci:'Schizachyrium scoparium',     emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full Sun', water:'Low', season:'Aug–Oct bloom; copper-red fall color persists all winter', timing:'Spring',
+    height:'1.5–4 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Turns copper-red in fall — stunning winter interest. Very drought-tolerant. Pairs beautifully with coneflowers. pH 6.5–8.' },
+  { id:'cg06', name:'Purple Top',               sci:'Tridens flavus',              emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Aug–Oct (red-purple airy bloom)', timing:'Spring',
+    height:'2–6.5 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Airy red-purple flowers float above the foliage in late summer. Great for naturalistic plantings. pH 4.5–6.5.' },
+  { id:'cg07', name:'Switchgrass',              sci:'Panicum virgatum',            emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Jul–Oct bloom; red or gold fall color', timing:'Spring',
+    height:'3–6 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Extremely adaptable. Airy seed heads feed birds all winter. Many ornamental cultivars. pH 4.5–8.' },
+  { id:'cg08', name:'Woodoats',                 sci:'Chasmanthium latifolium',     emoji:'🌾', type:'native', category:'Grass',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jul–Sep bloom; drooping oat seeds persist', timing:'Spring',
+    height:'2–5 ft', wildlife:'Song birds, small mammals, waterfowl',
+    notes:'Beautiful drooping seed heads that rattle in the breeze. Tolerates shade well. Excellent as cut or dried grass. pH 5–7.' },
+
+  // ── HERBACEOUS PERENNIALS ─────────────────────────────────────────────
+  { id:'cp01', name:'Black-Eyed Susan',         sci:'Rudbeckia hirta',             emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jun–Oct bloom (yellow with black eye)', timing:'Spring',
+    height:'1–3.5 ft', wildlife:'Butterflies, song birds, bees',
+    notes:'Easy, cheerful, drought-tolerant. Leave seed heads standing — goldfinches love them. pH 6–7.' },
+  { id:'cp02', name:'Blazing Star',             sci:'Liatris spicata',             emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jul–Aug bloom (rose-purple spikes)', timing:'Spring',
+    height:'1–6.5 ft', wildlife:'Butterflies, song birds, bees',
+    notes:'Blooms top-down — unusual among spike flowers. Monarch magnet. Excellent cut flower. pH 5.6–7.5.' },
+  { id:'cp03', name:'Blue Violet',              sci:'Viola sororia',               emoji:'💙', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'Mar–Jun bloom (dark blue-violet)', timing:'Spring or Fall',
+    height:'0.5–1 ft', wildlife:'Song birds, small mammals, bees',
+    notes:"Host plant for fritillary butterflies. Great native ground cover. Self-seeds freely. Stop calling it a 'weed'! pH 6–7.8." },
+  { id:'cp04', name:'Butterfly Weed',           sci:'Asclepias tuberosa',          emoji:'🦋', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'May–Jul bloom (bright orange clusters)', timing:'Spring',
+    height:'1–3 ft', wildlife:'Butterflies, bees (Monarch host plant)',
+    notes:"Monarch butterfly host plant. Deep taproot — don't transplant once established. One of the best native perennials. pH 4.8–6.8." },
+  { id:'cp05', name:'Cardinal Flower',          sci:'Lobelia cardinalis',          emoji:'❤️', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Jul–Oct bloom (bright red tubular)', timing:'Spring',
+    height:'2–4 ft', wildlife:'Hummingbirds, butterflies, song birds',
+    notes:'Hummingbird favorite. Loves moist spots near streams or ponds. Short-lived but self-seeds. pH 5.8–7.8.' },
+  { id:'cp06', name:'Common Milkweed',          sci:'Asclepias syriaca',           emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full Sun', water:'Low', season:'May–Aug bloom (pale purple, very fragrant)', timing:'Spring',
+    height:'3.5–6 ft', wildlife:'Butterflies, bees (essential Monarch host plant)',
+    notes:'Essential Monarch host plant. Fragrant flowers attract many pollinators. Spreads by rhizomes — give it space. pH 5.5–7.3.' },
+  { id:'cp07', name:'Early Coneflower',         sci:'Rudbeckia fulgida',           emoji:'🌻', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jul–Oct bloom (yellow-orange)', timing:'Spring',
+    height:'1–3.5 ft', wildlife:'Butterflies, song birds, bees',
+    notes:'More reliable than Rudbeckia hirta — true perennial. Goldfinches flock to seed heads in winter. pH 5–7.' },
+  { id:'cp08', name:'Evening Primrose',         sci:'Oenothera biennis',           emoji:'🌙', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'Jun–Oct bloom (yellow, opens at dusk)', timing:'Spring',
+    height:'1.5–6 ft', wildlife:'Bees, moths (night pollinators)',
+    notes:'Opens at dusk and pollinated by moths. Biennial but self-seeds readily. Edible roots and flowers. pH 5–7.' },
+  { id:'cp09', name:'Golden Ragwort',           sci:'Packera aurea',               emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Apr–Aug bloom (yellow star-like)', timing:'Spring or Fall',
+    height:'0.5–3 ft', wildlife:'Butterflies, bees',
+    notes:'One of the best native ground covers for shade. Evergreen rosette in winter. Spreads into a beautiful carpet. pH 5–6.8.' },
+  { id:'cp10', name:'Great Blue Lobelia',       sci:'Lobelia siphilitica',         emoji:'💙', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Aug–Oct bloom (blue-violet spikes)', timing:'Spring',
+    height:'1–5 ft', wildlife:'Hummingbirds, butterflies, song birds, bees',
+    notes:'Loves wet areas. Pairs beautifully with Cardinal Flower (red + blue). Also attracts hummingbirds. pH 5.8–6.5.' },
+  { id:'cp11', name:'Joe-Pye Weed',             sci:'Eupatorium fistulosum',       emoji:'🌷', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Adaptable', season:'Jul–Oct bloom (pink-purple clusters)', timing:'Spring',
+    height:'1.5–10 ft', wildlife:'Butterflies, song birds, bees',
+    notes:'Tall statement plant. Butterflies absolutely love it. Leave stalks standing all winter for wildlife. pH 4.5–7.' },
+  { id:'cp12', name:'New England Aster',        sci:'Symphyotrichum novae-angliae',emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'Aug–Oct bloom (violet — critical late season!)', timing:'Spring',
+    height:'1–6 ft', wildlife:'Butterflies, small mammals, bees',
+    notes:'Critical late-season nectar source for migrating Monarchs. Stunning purple display when everything else is done. pH 5–6.5.' },
+  { id:'cp13', name:'Obedient Plant',           sci:'Physostegia virginiana',      emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jun–Sep bloom (pink spikes)', timing:'Spring',
+    height:'1.5–5 ft', wildlife:'Butterflies',
+    notes:'Individual flowers snap to position when moved — hence the name. Can spread in moist soil. pH 5–7.' },
+  { id:'cp14', name:'Wild Bergamot',            sci:'Monarda fistulosa',           emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'Jul–Sep bloom (lavender)', timing:'Spring',
+    height:'2–4 ft', wildlife:'Hummingbirds, butterflies, bees',
+    notes:'Attracts hummingbirds, butterflies, and native bees. Spreads gently. Excellent cut flower. Deer-resistant.' },
+  { id:'cp15', name:'Meadow Phlox',             sci:'Phlox maculata',              emoji:'🌸', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'May–Sep bloom (pink-purple clusters)', timing:'Spring',
+    height:'1–3 ft', wildlife:'Butterflies, hummingbirds',
+    notes:'Fragrant pink clusters all summer. More mildew-resistant than P. paniculata. Loves moist soil. pH 5.9–6.8.' },
+  { id:'cp16', name:'Purple Coneflower',        sci:'Echinacea purpurea',          emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low', season:'Jun–Aug bloom (purple with orange eye)', timing:'Spring',
+    height:'2–5 ft', wildlife:'Butterflies, song birds (goldfinches eat seeds all winter)',
+    notes:'One of the most iconic native perennials. Leave seed heads — goldfinches eat them all winter. pH 5–7.' },
+  { id:'cp17', name:'Threadleaf Coreopsis',     sci:'Coreopsis verticillata',      emoji:'🌼', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Jun–Oct bloom (yellow)', timing:'Spring',
+    height:'0.5–3 ft', wildlife:'Butterflies, bees',
+    notes:'Fine lacy foliage with masses of yellow flowers. Very long bloom season. Drought-tolerant once established. pH 5–5.5.' },
+  { id:'cp18', name:'Virginia Bluebells',       sci:'Mertensia virginica',         emoji:'💙', type:'native', category:'Perennial',
+    sun:'Shade/Part Sun', water:'Medium–High', season:'Mar–Jun bloom (pink buds open to blue bells)', timing:'Fall or Spring',
+    height:'1–2.5 ft', wildlife:'Bees',
+    notes:'Goes dormant in summer — completely normal. Pair with hostas or ferns to fill the gap. pH 4.5–8.' },
+  { id:'cp19', name:'Virginia Bunchflower',     sci:'Melanthium virginicum',       emoji:'🌿', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'Jun–Aug bloom (green-white star-like)', timing:'Spring',
+    height:'2.5–6 ft', wildlife:'Bees',
+    notes:'Uncommon native with architectural presence. Tall wand of creamy flowers. Moist meadows and woodland edges. pH 4.5–7.' },
+  { id:'cp20', name:'Virginia Spiderwort',      sci:'Tradescantia virginiana',     emoji:'💜', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium', season:'Apr–Jun bloom (violet 3-petaled, morning blooms)', timing:'Spring',
+    height:'1–3 ft', wildlife:'Bees',
+    notes:'Blooms each morning then closes by afternoon. Very easy and adaptable. Can reseed prolifically. pH 4–8.' },
+  { id:'cp21', name:'White Turtlehead',         sci:'Chelone glabra',              emoji:'🤍', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Medium–High', season:'Jul–Oct bloom (white helmet-shaped)', timing:'Spring',
+    height:'1.5–6 ft', wildlife:'Butterflies, bees',
+    notes:'Baltimore Checkerspot butterfly host plant. Loves moist areas near water. Unusual snapdragon-like flowers. pH 4.5–6.8.' },
+  { id:'cp22', name:'Wild Columbine',           sci:'Aquilegia canadensis',        emoji:'🔔', type:'native', category:'Perennial',
+    sun:'Full/Part Sun', water:'Low–Medium', season:'Apr–Jul bloom (red and yellow nodding bells)', timing:'Spring or Fall',
+    height:'0.5–3 ft', wildlife:'Hummingbirds, butterflies, bees',
+    notes:'Hummingbird favorite in spring. Self-seeds freely — best sown in place. Great for rocky, dry spots. pH 5.8–6.8.' },
+
+  // ── NATIVE VINES ──────────────────────────────────────────────────────
+  { id:'cv01', name:'Coral Honeysuckle',        sci:'Lonicera sempervirens',       emoji:'🌺', type:'native', category:'Vine',
+    sun:'Full/Part Sun', water:'Low', season:'Apr–Sep bloom (red tubular)', timing:'Spring',
+    height:'10–20 ft', wildlife:'Hummingbirds, song birds',
+    notes:'Hummingbird magnet. Non-invasive unlike Japanese honeysuckle. Excellent for fences and trellises.' },
+
+  // ── VEGETABLES ────────────────────────────────────────────────────────
+  { id:'vg01', name:'Lettuce Mix',              sci:null, emoji:'🥬', type:'vegetable', category:'Vegetable',
+    sun:'Full/Part Sun', water:'Medium', season:'45–60 days', timing:'March–April or Aug–Sep',
+    height:'6–12 in', wildlife:null,
+    notes:'Cut-and-come-again — harvest outer leaves and it keeps growing. Bolts in summer heat.' },
+  { id:'vg02', name:'Spinach',                  sci:null, emoji:'🍃', type:'vegetable', category:'Vegetable',
+    sun:'Full/Part Sun', water:'Medium', season:'40–50 days', timing:'March–April or Aug–Sep',
+    height:'6–12 in', wildlife:null,
+    notes:'Bolts in summer heat — harvest before June, then plant again in fall.' },
+  { id:'vg03', name:'Kale',                     sci:null, emoji:'🥦', type:'vegetable', category:'Vegetable',
+    sun:'Full/Part Sun', water:'Medium', season:'Ongoing', timing:'Mar–Apr or Aug',
+    height:'1–3 ft', wildlife:null,
+    notes:'Very tough, lasts through fall frosts. One of the easiest vegetables for DC.' },
+  { id:'vg04', name:'Arugula',                  sci:null, emoji:'🌿', type:'vegetable', category:'Vegetable',
+    sun:'Full/Part Sun', water:'Medium', season:'40 days', timing:'March–April',
+    height:'6–12 in', wildlife:null,
+    notes:'Fast-growing peppery green. Succession plant every 2–3 weeks to extend harvest.' },
+  { id:'vg05', name:'Peas',                     sci:null, emoji:'🫛', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'Medium', season:'60–70 days', timing:'March (as early as possible)',
+    height:'2–6 ft (trellis)', wildlife:null,
+    notes:'Needs a trellis. Plant as early as soil can be worked. Stops producing once temps hit 80°F.' },
+  { id:'vg06', name:'Radishes',                 sci:null, emoji:'🔴', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'Medium', season:'25–30 days', timing:'March–April or Sep',
+    height:'6–12 in', wildlife:null,
+    notes:'Fastest vegetable in the garden. Perfect for beginners. Great as a spacer between slower crops.' },
+  { id:'vg07', name:'Cherry Tomatoes',          sci:null, emoji:'🍅', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'High', season:'60–80 days', timing:'After April 15',
+    height:'4–8 ft (staked)', wildlife:null,
+    notes:"'Sungold' or 'Sweet Million' most productive for beginners. Stake early, water consistently." },
+  { id:'vg08', name:'Peppers',                  sci:null, emoji:'🫑', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'Medium', season:'70–90 days', timing:'After April 15',
+    height:'1–3 ft', wildlife:null,
+    notes:'Buy transplants, not seeds. Love DC summer heat. Great in containers.' },
+  { id:'vg09', name:'Cucumber',                 sci:null, emoji:'🥒', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'High', season:'55–65 days', timing:'After April 15',
+    height:'6 ft (trellis)', wildlife:null,
+    notes:'Train up a trellis to save space. Harvest often to keep plant producing. Bitter if water-stressed.' },
+  { id:'vg10', name:'Zucchini',                 sci:null, emoji:'🟩', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'Medium', season:'50–60 days', timing:'After April 15',
+    height:'2–3 ft', wildlife:null,
+    notes:'Very prolific — one plant is plenty. Harvest small (6–8") for best flavor.' },
+  { id:'vg11', name:'Green Beans',              sci:null, emoji:'🫘', type:'vegetable', category:'Vegetable',
+    sun:'Full Sun', water:'Medium', season:'50–60 days', timing:'After April 15',
+    height:'1–2 ft (bush)', wildlife:null,
+    notes:'Easy from seed directly in the ground. Bush beans need no support. Succession plant.' },
+
+  // ── HERBS ─────────────────────────────────────────────────────────────
+  { id:'hr01', name:'Basil',                    sci:'Ocimum basilicum',            emoji:'🌿', type:'herb', category:'Herb',
+    sun:'Full Sun', water:'Medium', season:'Ongoing (summer)', timing:'After April 15',
+    height:'1–2 ft', wildlife:null,
+    notes:'Pinch off flowers immediately to extend harvest. Grows well next to tomatoes. Frost-sensitive.' },
+  { id:'hr02', name:'Mint',                     sci:'Mentha spp.',                 emoji:'🍃', type:'herb', category:'Herb',
+    sun:'Full/Part Sun', water:'Medium', season:'Ongoing', timing:'Spring',
+    height:'1–3 ft', wildlife:null,
+    notes:'MUST be grown in a container — spreads aggressively. Many varieties: spearmint, peppermint, chocolate.' },
+  { id:'hr03', name:'Thyme',                    sci:'Thymus vulgaris',             emoji:'🌱', type:'herb', category:'Herb',
+    sun:'Full Sun', water:'Low', season:'Ongoing', timing:'Spring',
+    height:'6–12 in', wildlife:null,
+    notes:'Very low maintenance. Hardy in DC winters. Bees love the tiny flowers. Great between paving stones.' },
+  { id:'hr04', name:'Rosemary',                 sci:'Salvia rosmarinus',           emoji:'🪴', type:'herb', category:'Herb',
+    sun:'Full Sun', water:'Low', season:'Ongoing', timing:'Spring',
+    height:'2–4 ft', wildlife:null,
+    notes:'Hardy in DC Zone 7a winters. Can grow into a large shrub. Beautiful blue flowers in spring.' },
+];
 
 const DEFAULTS = {
   calendarTasks: [
@@ -4053,26 +4467,162 @@ function updatePlantStatus(id, status) {
   showToast(`${STATUS_META[status].icon} ${p.name} → ${STATUS_META[status].label}`);
 }
 
-function openAddPlant() {
+// ── Plant Catalog helpers ─────────────────────────────────────────────────────
+
+let _catalogTab = 'all';
+
+function mapCatalogSun(sunStr) {
+  if (!sunStr) return 'Full Sun';
+  const s = sunStr.toLowerCase();
+  if (s.includes('full sun') || s === 'sun') return 'Full Sun';
+  if (s.includes('part') || s.includes('partial')) return 'Part Sun';
+  if (s.includes('shade') || s === 'fs') return 'Shade';
+  return 'Full Sun';
+}
+
+function mapCatalogWater(waterStr) {
+  if (!waterStr) return 'Medium';
+  const w = waterStr.toLowerCase();
+  if (w.includes('low') || w.includes('dry') || w.includes('xeric')) return 'Low';
+  if (w.includes('high') || w.includes('wet') || w.includes('moist')) return 'High';
+  return 'Medium';
+}
+
+function checkPlantDuplicate(name, sci) {
+  const n = (name || '').toLowerCase().trim();
+  const s = (sci  || '').toLowerCase().trim();
+  return db.plants.find(p =>
+    (p.name || '').toLowerCase().trim() === n ||
+    (s && (p.sci  || '').toLowerCase().trim() === s)
+  ) || null;
+}
+
+function showCatalogView() {
+  document.getElementById('plant-catalog-view').style.display = '';
+  document.getElementById('plant-form-view').style.display    = 'none';
+  document.getElementById('plant-modal-title').textContent    = 'Add Plant';
+  renderCatalog();
+  setTimeout(() => document.getElementById('catalog-search').focus(), 80);
+}
+
+function showPlantForm(catalogEntry) {
+  document.getElementById('plant-catalog-view').style.display = 'none';
+  document.getElementById('plant-form-view').style.display    = '';
   _editPlantId = null;
-  document.getElementById('plant-modal-title').textContent = 'Add Plant';
-  ['plant-name','plant-sci','plant-emoji','plant-season','plant-timing','plant-notes'].forEach(id => document.getElementById(id).value = '');
+
+  // Clear form
+  ['plant-name','plant-sci','plant-emoji','plant-season','plant-timing','plant-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
   document.getElementById('plant-type').value   = 'native';
   document.getElementById('plant-sun').value    = 'Full Sun';
   document.getElementById('plant-water').value  = 'Medium';
-  document.getElementById('plant-status').value = 'planned';
+  document.getElementById('plant-status').value = 'planted';
   document.getElementById('plant-date').value   = '';
   document.getElementById('plant-zone').value   = '';
   document.getElementById('plant-delete-btn').style.display = 'none';
+
+  const banner = document.getElementById('plant-dup-banner');
+
+  if (catalogEntry) {
+    document.getElementById('plant-modal-title').textContent = catalogEntry.name;
+    document.getElementById('plant-name').value    = catalogEntry.name;
+    document.getElementById('plant-sci').value     = catalogEntry.sci    || '';
+    document.getElementById('plant-emoji').value   = catalogEntry.emoji  || '🌱';
+    document.getElementById('plant-type').value    = catalogEntry.type   || 'native';
+    document.getElementById('plant-sun').value     = mapCatalogSun(catalogEntry.sun);
+    document.getElementById('plant-water').value   = mapCatalogWater(catalogEntry.water);
+    document.getElementById('plant-season').value  = catalogEntry.season || '';
+    document.getElementById('plant-timing').value  = catalogEntry.timing || '';
+    document.getElementById('plant-notes').value   = catalogEntry.notes  || '';
+
+    const dup = checkPlantDuplicate(catalogEntry.name, catalogEntry.sci);
+    if (dup) {
+      banner.style.display = '';
+      const msg = document.getElementById('plant-dup-msg');
+      if (msg) msg.textContent = `"${catalogEntry.name}" is already in your garden (${dup.status}). You can still add it — maybe a different spot or date.`;
+    } else {
+      banner.style.display = 'none';
+    }
+  } else {
+    document.getElementById('plant-modal-title').textContent = 'Add Custom Plant';
+    banner.style.display = 'none';
+    setTimeout(() => document.getElementById('plant-name').focus(), 80);
+  }
+}
+
+function renderCatalog() {
+  const search = (document.getElementById('catalog-search').value || '').toLowerCase().trim();
+  const grid   = document.getElementById('catalog-grid');
+  const tab    = _catalogTab;
+
+  let items = PLANT_CATALOG.filter(p => {
+    if (tab !== 'all') {
+      if (p.category !== tab) return false;
+    }
+    if (search) {
+      return (p.name + ' ' + (p.sci||'') + ' ' + (p.notes||'')).toLowerCase().includes(search);
+    }
+    return true;
+  });
+
+  if (!items.length) {
+    grid.innerHTML = '<p style="color:var(--text-3);padding:1rem 0;grid-column:1/-1">No plants match your search.</p>';
+    return;
+  }
+
+  grid.innerHTML = items.map(p => {
+    const dup = checkPlantDuplicate(p.name, p.sci);
+    return `<button class="catalog-item${dup ? ' catalog-item-owned' : ''}" onclick="pickFromCatalog('${p.id}')" title="${p.sci || ''}">
+      <span class="catalog-emoji">${p.emoji || '🌱'}</span>
+      <span style="flex:1;min-width:0">
+        <span class="catalog-item-name">${p.name}</span><br>
+        <span class="catalog-item-sci">${p.sci || ''}</span>
+      </span>
+      <span class="catalog-item-cat">${p.category}${dup ? ' · ✓' : ''}</span>
+    </button>`;
+  }).join('');
+}
+
+function filterCatalog() { renderCatalog(); }
+
+function setCatalogTab(el) {
+  const tab = el.dataset.cat || 'all';
+  _catalogTab = tab;
+  document.querySelectorAll('.catalog-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === tab);
+  });
+  renderCatalog();
+}
+
+function pickFromCatalog(id) {
+  const entry = PLANT_CATALOG.find(p => p.id === id);
+  if (entry) showPlantForm(entry);
+}
+
+// ── Plant modal open/close ────────────────────────────────────────────────────
+
+function openAddPlant() {
+  document.getElementById('catalog-search').value = '';
+  _catalogTab = 'all';
+  document.querySelectorAll('.catalog-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === 'all');
+  });
   openModal('plant');
-  setTimeout(() => document.getElementById('plant-name').focus(), 100);
+  showCatalogView();
 }
 
 function openEditPlant(id) {
   const p = db.plants.find(p => p.id === id);
   if (!p) return;
   _editPlantId = id;
-  document.getElementById('plant-modal-title').textContent = 'Edit Plant';
+
+  // Go straight to form view (no catalog for edits)
+  document.getElementById('plant-catalog-view').style.display = 'none';
+  document.getElementById('plant-form-view').style.display    = '';
+  document.getElementById('plant-modal-title').textContent    = 'Edit Plant';
+  document.getElementById('plant-dup-banner').style.display   = 'none';
+
   document.getElementById('plant-name').value    = p.name;
   document.getElementById('plant-sci').value     = p.sci     || '';
   document.getElementById('plant-emoji').value   = p.emoji   || '';
