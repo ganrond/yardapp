@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <script>
+    (function(){ var t=localStorage.getItem('yardapp-theme'); if(t&&t!=='forest') document.documentElement.setAttribute('data-theme',t); })();
+  </script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%231e4d34'/><path d='M16 27 L16 14' stroke='%23b7e4c7' stroke-width='2' stroke-linecap='round' fill='none'/><path d='M16 21 C13 19 8 17 6 11 C10 9 15 12 16 19 Z' fill='%2352b788'><animateTransform attributeName='transform' type='rotate' values='0 16 21;-8 16 21;0 16 21' dur='3.6s' repeatCount='indefinite' calcMode='spline' keySplines='0.5 0 0.5 1;0.5 0 0.5 1'/></path><path d='M16 17 C19 15 24 13 26 7 C22 5 17 8 16 15 Z' fill='%23b7e4c7' opacity='0.85'><animateTransform attributeName='transform' type='rotate' values='0 16 17;8 16 17;0 16 17' dur='4s' repeatCount='indefinite' calcMode='spline' keySplines='0.5 0 0.5 1;0.5 0 0.5 1'/></path><circle cx='16' cy='14' r='1.5' fill='%23b7e4c7' opacity='0.75'><animate attributeName='r' values='1.5;2;1.5' dur='2.6s' repeatCount='indefinite'/></circle></svg>">
   <style>
     /* ── VARIABLES ── */
@@ -894,12 +897,12 @@
     .btn:active { transform: scale(0.96); }
 
     .btn-primary {
-      background: linear-gradient(155deg, #336e54 0%, var(--g-deep) 100%);
+      background: linear-gradient(155deg, var(--g-mid) 0%, var(--g-deep) 100%);
       box-shadow: 0 2px 8px rgba(30,77,52,0.28), 0 1px 2px rgba(30,77,52,0.15);
     }
 
     .btn-primary:hover {
-      background: linear-gradient(155deg, #3a7a5e 0%, #1e4d34 100%);
+      background: linear-gradient(155deg, var(--g-light) 0%, var(--g-mid) 100%);
       box-shadow: 0 4px 16px rgba(30,77,52,0.32), 0 1px 3px rgba(30,77,52,0.15);
       transform: translateY(-1px);
     }
@@ -1056,6 +1059,217 @@
       0%, 100% { transform: scale(1);   opacity: 0.8; }
       50%       { transform: scale(1.4); opacity: 1;   }
     }
+
+    /* ═══════════════════════════════════════════
+       THEMES
+    ═══════════════════════════════════════════ */
+
+    /* ── Desert Dawn ── */
+    [data-theme="desert"] {
+      --g-deep:   #6b3520;
+      --g-mid:    #9a4e2c;
+      --g-light:  #d4845a;
+      --g-pale:   #f0c4a8;
+      --g-bg:     #fdf0e6;
+      --cream:    #faf5f0;
+      --text-1:   #2e1a0e;
+      --text-2:   #5a3820;
+      --text-3:   #8a6a50;
+      --border:   #edddd0;
+      --amber:    #b86e10;
+      --amber-bg: #fff3e0;
+      --shadow:   0 2px 12px rgba(107,53,32,0.09);
+      --shadow-h: 0 6px 24px rgba(107,53,32,0.14);
+    }
+    [data-theme="desert"] header { background: linear-gradient(150deg, #4a2010 0%, #6b3520 55%, #7a3e24 100%); }
+    [data-theme="desert"] nav    { background: linear-gradient(180deg, #6b3520 0%, #9a4e2c 100%); }
+
+    /* ── Slate Ocean ── */
+    [data-theme="ocean"] {
+      --g-deep:   #163850;
+      --g-mid:    #1e5470;
+      --g-light:  #3a9ab4;
+      --g-pale:   #a0d4e8;
+      --g-bg:     #e6f4f8;
+      --cream:    #f0f7fa;
+      --text-1:   #0a1e2e;
+      --text-2:   #284858;
+      --text-3:   #587888;
+      --border:   #cce0ec;
+      --amber:    #b87a20;
+      --shadow:   0 2px 12px rgba(22,56,80,0.09);
+      --shadow-h: 0 6px 24px rgba(22,56,80,0.14);
+    }
+    [data-theme="ocean"] header { background: linear-gradient(150deg, #0c2235 0%, #163850 55%, #1a3e5c 100%); }
+    [data-theme="ocean"] nav    { background: linear-gradient(180deg, #163850 0%, #1e5470 100%); }
+
+    /* ── Sage & Stone ── */
+    [data-theme="stone"] {
+      --g-deep:   #3a4035;
+      --g-mid:    #5a6450;
+      --g-light:  #8ea07e;
+      --g-pale:   #c4d0b4;
+      --g-bg:     #eef1eb;
+      --cream:    #f6f5f2;
+      --text-1:   #222520;
+      --text-2:   #464e40;
+      --text-3:   #767e6e;
+      --border:   #dce2d4;
+      --shadow:   0 2px 12px rgba(58,64,53,0.09);
+      --shadow-h: 0 6px 24px rgba(58,64,53,0.14);
+    }
+    [data-theme="stone"] header { background: linear-gradient(150deg, #272b22 0%, #3a4035 55%, #424838 100%); }
+    [data-theme="stone"] nav    { background: linear-gradient(180deg, #3a4035 0%, #5a6450 100%); }
+
+    /* ── Night Garden (dark) ── */
+    [data-theme="night"] {
+      --g-deep:   #50c07e;
+      --g-mid:    #3a9060;
+      --g-light:  #287045;
+      --g-pale:   #1c4a2e;
+      --g-bg:     #0d1e14;
+      --cream:    #0a1510;
+      --text-1:   #cce6d4;
+      --text-2:   #84a892;
+      --text-3:   #4c6a58;
+      --border:   #1a3022;
+      --amber:    #d09640;
+      --amber-bg: #1a1308;
+      --sky:      #5498c8;
+      --sky-bg:   #081420;
+      --red:      #d86060;
+      --red-bg:   #1c0808;
+      --shadow:   0 2px 12px rgba(0,0,0,0.4);
+      --shadow-h: 0 6px 24px rgba(0,0,0,0.55);
+    }
+    [data-theme="night"] header {
+      background: linear-gradient(150deg, #060e08 0%, #0a1610 55%, #0c1a12 100%);
+      box-shadow: 0 1px 0 rgba(80,192,126,0.08), 0 4px 28px rgba(0,0,0,0.55);
+    }
+    [data-theme="night"] nav {
+      background: linear-gradient(180deg, #0a1610 0%, #0d1c14 100%);
+      border-bottom-color: rgba(80,192,126,0.08);
+    }
+    /* Dark surface overrides (--white is kept #fff so color:var(--white) stays light) */
+    [data-theme="night"] .card,
+    [data-theme="night"] .plant-card,
+    [data-theme="night"] .plant-stat,
+    [data-theme="night"] .gear-card,
+    [data-theme="night"] .seed-card,
+    [data-theme="night"] .note-card,
+    [data-theme="night"] .photo-card,
+    [data-theme="night"] .bsum-card,
+    [data-theme="night"] .due-card,
+    [data-theme="night"] .harvest-stat,
+    [data-theme="night"] .soil-zone-card,
+    [data-theme="night"] .modal-box,
+    [data-theme="night"] .filter-tabs,
+    [data-theme="night"] .gear-status-tabs,
+    [data-theme="night"] .cal-nav,
+    [data-theme="night"] .cal-month-section,
+    [data-theme="night"] .map-sidebar-section,
+    [data-theme="night"] .map-canvas-wrap,
+    [data-theme="night"] .plant-footer,
+    [data-theme="night"] .budget-cat-section,
+    [data-theme="night"] .budget-progress-wrap { background: #111e16; border-color: #1a3020; }
+
+    [data-theme="night"] .task-item,
+    [data-theme="night"] .zone-row,
+    [data-theme="night"] .forecast-day,
+    [data-theme="night"] .harvest-row,
+    [data-theme="night"] .plant-now-item { background: #0d1a12; }
+
+    [data-theme="night"] input[type=text],
+    [data-theme="night"] input[type=number],
+    [data-theme="night"] input[type=date],
+    [data-theme="night"] input[type=email],
+    [data-theme="night"] select,
+    [data-theme="night"] textarea,
+    [data-theme="night"] .plants-search { background: #0d1a12; color: var(--text-1); border-color: var(--border); }
+
+    [data-theme="night"] .card,
+    [data-theme="night"] .plant-card { border-top-color: rgba(80,192,126,0.07); }
+
+    /* ── Theme Switcher ── */
+    .theme-toggle-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--g-pale);
+      cursor: pointer; padding: 5px 9px; border-radius: 99px;
+      border: 1px solid rgba(255,255,255,0.14); background: none;
+      transition: background 0.18s, border-color 0.18s;
+      white-space: nowrap; font-family: 'DM Sans', sans-serif;
+    }
+    .theme-toggle-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.26); }
+
+    .theme-swatch-mini {
+      width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      background: #1e4d34;
+    }
+
+    .theme-panel {
+      position: fixed;
+      top: 112px; right: 16px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      width: 220px;
+      z-index: 300;
+      opacity: 0;
+      transform: scale(0.94) translateY(-10px);
+      pointer-events: none;
+      transform-origin: top right;
+      transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.06), 0 20px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    .theme-panel.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+
+    .theme-panel-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: #7a8f7a; margin-bottom: 10px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .theme-options { display: flex; flex-direction: column; gap: 3px; }
+
+    .theme-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: 10px; border: none;
+      background: none; cursor: pointer; width: 100%; text-align: left;
+      transition: background 0.15s; font-family: 'DM Sans', sans-serif;
+    }
+    .theme-option:hover  { background: #eaf7ee; }
+    .theme-option.active { background: #eaf7ee; }
+
+    .theme-option-swatch {
+      width: 28px; height: 28px; border-radius: 50%;
+      overflow: hidden; display: flex; flex-shrink: 0;
+      border: 2px solid rgba(0,0,0,0.08);
+    }
+    .swatch-half { flex: 1; height: 100%; }
+
+    .theme-option-name {
+      font-size: 13px; font-weight: 500; flex: 1; color: #1a2e1a;
+    }
+    .theme-option-check {
+      font-size: 13px; color: #2d6a4f;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .theme-option.active .theme-option-check { opacity: 1; }
+
+    [data-theme="night"] .theme-panel {
+      background: #111e16;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 20px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(80,192,126,0.08);
+    }
+    [data-theme="night"] .theme-panel-title { color: #4c6a58; }
+    [data-theme="night"] .theme-option:hover,
+    [data-theme="night"] .theme-option.active { background: #0d1a12; }
+    [data-theme="night"] .theme-option-name  { color: #cce6d4; }
+    [data-theme="night"] .theme-option-check { color: #50c07e; }
+
+    @media (max-width: 580px) {
+      .theme-panel { top: auto; bottom: 16px; right: 12px; left: 12px; width: auto; transform-origin: bottom right; }
+      .theme-panel.open { transform: scale(1) translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -1084,10 +1298,16 @@
       <strong id="hdr-weekday"></strong>
       <span id="hdr-date"></span>
     </div>
-    <button class="sync-badge" id="sync-badge" onclick="manualSync()" title="Tap to sync with cloud">
-      <span class="sync-dot" id="sync-dot"></span>
-      <span id="sync-label">Sync</span>
-    </button>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="sync-badge" id="sync-badge" onclick="manualSync()" title="Tap to sync with cloud">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span id="sync-label">Sync</span>
+      </button>
+      <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleThemePanel()" title="Change theme">
+        <span class="theme-swatch-mini" id="theme-swatch-mini"></span>
+        Theme
+      </button>
+    </div>
   </div>
 </header>
 
@@ -4723,6 +4943,55 @@ function renderWaterSchedule() {
 }
 
 // ═══════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════
+const THEME_SWATCHES = {
+  forest:  '#1e4d34',
+  desert:  '#9a4e2c',
+  ocean:   '#1e5470',
+  stone:   '#5a6450',
+  night:   '#0a1510',
+};
+
+function setTheme(name) {
+  if (name === 'forest') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', name);
+  }
+  localStorage.setItem('yardapp-theme', name);
+  const mini = document.getElementById('theme-swatch-mini');
+  if (mini) mini.style.background = THEME_SWATCHES[name] || THEME_SWATCHES.forest;
+  document.querySelectorAll('.theme-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.themeOpt === name);
+  });
+  closeThemePanel();
+}
+
+function toggleThemePanel() {
+  document.getElementById('theme-panel').classList.toggle('open');
+}
+
+function closeThemePanel() {
+  document.getElementById('theme-panel').classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  const panel = document.getElementById('theme-panel');
+  const btn   = document.getElementById('theme-toggle-btn');
+  if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) closeThemePanel();
+});
+
+(function initTheme() {
+  const saved = localStorage.getItem('yardapp-theme') || 'forest';
+  const mini  = document.getElementById('theme-swatch-mini');
+  if (mini) mini.style.background = THEME_SWATCHES[saved] || THEME_SWATCHES.forest;
+  document.querySelectorAll('.theme-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.themeOpt === saved);
+  });
+})();
+
+// ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
 (async () => {
@@ -4733,5 +5002,54 @@ function renderWaterSchedule() {
   renderDashboard();
 })();
 </script>
+
+<!-- ══════════════════════════════════════════
+     THEME PANEL
+══════════════════════════════════════════ -->
+<div id="theme-panel" class="theme-panel">
+  <div class="theme-panel-title">Appearance</div>
+  <div class="theme-options">
+    <button class="theme-option" data-theme-opt="forest" onclick="setTheme('forest')">
+      <span class="theme-option-swatch">
+        <span class="swatch-half" style="background:#1e4d34"></span>
+        <span class="swatch-half" style="background:#f8f5f0"></span>
+      </span>
+      <span class="theme-option-name">Forest</span>
+      <span class="theme-option-check">✓</span>
+    </button>
+    <button class="theme-option" data-theme-opt="desert" onclick="setTheme('desert')">
+      <span class="theme-option-swatch">
+        <span class="swatch-half" style="background:#9a4e2c"></span>
+        <span class="swatch-half" style="background:#faf5f0"></span>
+      </span>
+      <span class="theme-option-name">Desert</span>
+      <span class="theme-option-check">✓</span>
+    </button>
+    <button class="theme-option" data-theme-opt="ocean" onclick="setTheme('ocean')">
+      <span class="theme-option-swatch">
+        <span class="swatch-half" style="background:#1e5470"></span>
+        <span class="swatch-half" style="background:#f0f7fa"></span>
+      </span>
+      <span class="theme-option-name">Ocean</span>
+      <span class="theme-option-check">✓</span>
+    </button>
+    <button class="theme-option" data-theme-opt="stone" onclick="setTheme('stone')">
+      <span class="theme-option-swatch">
+        <span class="swatch-half" style="background:#5a6450"></span>
+        <span class="swatch-half" style="background:#f6f5f2"></span>
+      </span>
+      <span class="theme-option-name">Stone</span>
+      <span class="theme-option-check">✓</span>
+    </button>
+    <button class="theme-option" data-theme-opt="night" onclick="setTheme('night')">
+      <span class="theme-option-swatch">
+        <span class="swatch-half" style="background:#0a1510"></span>
+        <span class="swatch-half" style="background:#1a3020"></span>
+      </span>
+      <span class="theme-option-name">Night</span>
+      <span class="theme-option-check">✓</span>
+    </button>
+  </div>
+</div>
 </body>
 </html>
